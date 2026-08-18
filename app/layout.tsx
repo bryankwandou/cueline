@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import { LangProvider } from "@/lib/i18n";
 import "./globals.css";
 
 /**
@@ -40,7 +41,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${mono.variable}`}>
-      <body className="grain min-h-dvh antialiased">{children}</body>
+      <body className="grain min-h-dvh antialiased">
+        <LangProvider>{children}</LangProvider>
+      </body>
     </html>
   );
 }

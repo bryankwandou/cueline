@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
 import { LiveClock } from "@/components/live-clock";
+import { LangToggle } from "@/components/lang-toggle";
+import { useT } from "@/lib/i18n";
 
 export default function Landing() {
   return (
@@ -18,34 +22,36 @@ export default function Landing() {
 }
 
 function Nav() {
+  const t = useT();
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Wordmark size={26} />
-        <nav className="flex items-center gap-7 text-sm">
+        <nav className="flex items-center gap-5 text-sm sm:gap-7">
           <a
             href="#how"
             className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
           >
-            How it runs
+            {t("nav.how")}
           </a>
           <a
             href="#key"
             className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
           >
-            Your key
+            {t("nav.key")}
           </a>
           <a
             href="#cost"
             className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
           >
-            Cost
+            {t("nav.cost")}
           </a>
+          <LangToggle />
           <Link
             href="/console"
             className="rounded-[var(--r-control)] bg-fg px-4 py-2 font-medium text-bg transition-opacity duration-150 hover:opacity-85"
           >
-            Open console
+            {t("nav.console")}
           </Link>
         </nav>
       </div>
@@ -54,30 +60,29 @@ function Nav() {
 }
 
 function Hero() {
+  const t = useT();
   return (
     <section className="mx-auto max-w-6xl px-6 pt-24 pb-28 sm:pt-32">
       <div className="grid items-center gap-16 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="rise">
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line bg-panel px-3 py-1.5 text-xs text-muted">
+          <div className="mb-7 inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-line bg-panel px-3 py-1.5 text-xs text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            Runs on Claude Haiku 4.5
+            {t("hero.badge")}
           </div>
 
           <h1
             className="text-[2.75rem] leading-[1.05] font-semibold text-balance sm:text-6xl"
             style={{ letterSpacing: "-0.04em" }}
           >
-            Your prompts fire
+            {t("hero.h1a")}
             <br />
-            while you&rsquo;re still
+            {t("hero.h1b")}
             <br />
-            <span className="text-accent">stuck in traffic.</span>
+            <span className="text-accent">{t("hero.h1c")}</span>
           </h1>
 
           <p className="mt-7 max-w-xl text-lg leading-relaxed text-muted">
-            You send roughly the same three prompts every morning. Write them
-            once, put a clock on them, and read the answers when you sit down.
-            Nobody has to type at a red light.
+            {t("hero.sub")}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -85,19 +90,17 @@ function Hero() {
               href="/console"
               className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
             >
-              Queue your first cue
+              {t("hero.cta")}
             </Link>
             <a
               href="#key"
               className="rounded-[var(--r-control)] border border-line-strong px-6 py-3 font-medium text-fg transition-colors duration-150 hover:bg-panel"
             >
-              Where does my key go?
+              {t("hero.cta2")}
             </a>
           </div>
 
-          <p className="mt-6 text-sm text-faint">
-            No account. Nothing to install. Bring your own Anthropic key.
-          </p>
+          <p className="mt-6 text-sm text-faint">{t("hero.note")}</p>
         </div>
 
         <TimerCard />
@@ -107,51 +110,48 @@ function Hero() {
 }
 
 function TimerCard() {
+  const t = useT();
   return (
     <div className="rise rounded-[var(--r-hero)] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
       <div className="flex items-center justify-between border-b border-line pb-4">
         <span className="text-xs tracking-wide text-faint uppercase">
-          Next fire
+          {t("card.next")}
         </span>
         <span className="flex items-center gap-2 text-xs text-accent">
           <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-          Armed
+          {t("card.armed")}
         </span>
       </div>
 
       <div className="py-9">
         <LiveClock />
         <p className="mt-3 text-center text-xs text-faint">
-          counting to your next 07:00
+          {t("card.counting")}
         </p>
       </div>
 
       <div className="space-y-2.5">
-        {[
-          "Summarise everything in #standup since 6pm",
-          "Three risks in the Q3 forecast, one line each",
-          "What did I say I'd finish today?",
-        ].map((line, i) => (
+        {(["card.cue1", "card.cue2", "card.cue3"] as const).map((k, i) => (
           <div
-            key={line}
+            key={k}
             className="flex items-start gap-3 rounded-[var(--r-control)] border border-line bg-bg-raised px-4 py-3"
           >
             <span className="tnum mt-0.5 font-mono text-xs text-faint">
               0{i + 1}
             </span>
-            <span className="text-sm leading-snug text-muted">{line}</span>
+            <span className="text-sm leading-snug text-muted">{t(k)}</span>
           </div>
         ))}
       </div>
 
-      <p className="mt-5 text-xs text-faint">
-        Three cues, sent in order, roughly a tenth of a cent.
-      </p>
+      <p className="mt-5 text-xs text-faint">{t("card.foot")}</p>
     </div>
   );
 }
 
 function Problem() {
+  const t = useT();
+  const [line1, line2] = t("problem.h").split("\n");
   return (
     <section className="border-y border-line bg-bg-raised/40">
       <div className="mx-auto max-w-6xl px-6 py-20">
@@ -160,22 +160,13 @@ function Problem() {
             className="text-3xl leading-tight font-semibold text-balance sm:text-4xl"
             style={{ letterSpacing: "-0.03em" }}
           >
-            The work is scheduled.
+            {line1}
             <br />
-            The typing isn&rsquo;t.
+            {line2}
           </h2>
           <div className="space-y-5 text-lg leading-relaxed text-muted">
-            <p>
-              The morning brief lands at 07:00 whether or not you are at a desk.
-              So people type it out on a phone, in a car, on a train — or they
-              skip it and lose the thread for a day.
-            </p>
-            <p>
-              The prompt was never the hard part. The hard part is that you have
-              to be somewhere specific, holding something, at a particular
-              minute. Cueline moves that minute off your shoulders and onto a
-              clock.
-            </p>
+            <p>{t("problem.p1")}</p>
+            <p>{t("problem.p2")}</p>
           </div>
         </div>
       </div>
@@ -184,22 +175,11 @@ function Problem() {
 }
 
 function Steps() {
+  const t = useT();
   const steps = [
-    {
-      n: "01",
-      t: "Paste your key",
-      d: "An Anthropic API key from the Console. It is stored in this browser and nowhere else — no account to make, no password to forget.",
-    },
-    {
-      n: "02",
-      t: "Write your cues",
-      d: "The prompts you'd otherwise type by hand. Add as many as you want; they run top to bottom, one after another.",
-    },
-    {
-      n: "03",
-      t: "Set the clock and walk away",
-      d: "Hours, minutes, seconds. When it hits zero the queue runs and the replies are waiting when you come back to the tab.",
-    },
+    { n: "01", t: t("steps.1t"), d: t("steps.1d") },
+    { n: "02", t: t("steps.2t"), d: t("steps.2d") },
+    { n: "03", t: t("steps.3t"), d: t("steps.3d") },
   ];
 
   return (
@@ -208,12 +188,9 @@ function Steps() {
         className="text-3xl font-semibold sm:text-4xl"
         style={{ letterSpacing: "-0.03em" }}
       >
-        Three things, then nothing
+        {t("steps.h")}
       </h2>
-      <p className="mt-4 max-w-2xl text-lg text-muted">
-        Setup takes about as long as sending one prompt manually. After that you
-        stop thinking about it.
-      </p>
+      <p className="mt-4 max-w-2xl text-lg text-muted">{t("steps.sub")}</p>
 
       {/* A rail, not a three-up card grid: the product is a queue on a
           timeline, so the layout is the same shape as the thing it sells.
@@ -252,6 +229,14 @@ function Steps() {
 }
 
 function KeyStory() {
+  const t = useT();
+  const rows: [string, string, boolean][] = [
+    ["browser", t("key.r1"), true],
+    ["/api/run", t("key.r2"), true],
+    ["anthropic", t("key.r3"), true],
+    ["database", t("key.r4"), false],
+  ];
+
   return (
     <section id="key" className="border-y border-line bg-bg-raised/40">
       <div className="mx-auto max-w-6xl px-6 py-24">
@@ -261,46 +246,36 @@ function KeyStory() {
               className="text-3xl font-semibold sm:text-4xl"
               style={{ letterSpacing: "-0.03em" }}
             >
-              Your key never sleeps here
+              {t("key.h")}
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-muted">
-              There is no user table, no key vault, no session store. The key
-              sits in your browser&rsquo;s local storage. When a cue fires, it
-              rides along on that one request, gets used, and is dropped when
-              the request ends.
+              {t("key.p1")}
             </p>
             <p className="mt-4 text-lg leading-relaxed text-muted">
-              That is a real constraint, not a slogan: it means we could not hand
-              your key to anyone even if we were asked to, because we do not have
-              it after the call returns.
+              {t("key.p2")}
             </p>
           </div>
 
           <div className="rounded-[var(--r-panel)] border border-line bg-panel p-7">
             <div className="space-y-4 font-mono text-sm">
-              {[
-                ["browser", "holds the key", true],
-                ["/api/run", "borrows it for one call", true],
-                ["anthropic", "answers", true],
-                ["database", "does not exist", false],
-              ].map(([where, what, live]) => (
+              {rows.map(([where, what, live]) => (
                 <div
-                  key={where as string}
-                  className="flex items-center justify-between border-b border-line pb-4 last:border-0 last:pb-0"
+                  key={where}
+                  className="flex items-center justify-between gap-4 border-b border-line pb-4 last:border-0 last:pb-0"
                 >
                   <span className={live ? "text-fg" : "text-faint line-through"}>
                     {where}
                   </span>
-                  <span className={live ? "text-muted" : "text-faint"}>
+                  <span
+                    className={`text-right ${live ? "text-muted" : "text-faint"}`}
+                  >
                     {what}
                   </span>
                 </div>
               ))}
             </div>
             <p className="mt-6 text-xs leading-relaxed text-faint">
-              Because storage is local, cues fire while the tab is open —
-              backgrounded is fine, closed is not. That is the honest trade for
-              not holding anyone&rsquo;s credentials.
+              {t("key.note")}
             </p>
           </div>
         </div>
@@ -310,10 +285,11 @@ function KeyStory() {
 }
 
 function Cost() {
+  const t = useT();
   const rows = [
-    ["One short cue", "~600 tokens", "$0.0004"],
-    ["A three-cue morning brief", "~2,400 tokens", "$0.0016"],
-    ["Every weekday for a month", "~52,000 tokens", "$0.035"],
+    [t("cost.r1"), "~600 tokens", "$0.0004"],
+    [t("cost.r2"), "~2,400 tokens", "$0.0016"],
+    [t("cost.r3"), "~52,000 tokens", "$0.035"],
   ];
 
   return (
@@ -323,13 +299,9 @@ function Cost() {
           className="text-3xl font-semibold sm:text-4xl"
           style={{ letterSpacing: "-0.03em" }}
         >
-          It costs about a nickel a month
+          {t("cost.h")}
         </h2>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Haiku 4.5 is priced at $1 per million input tokens and $5 per million
-          output. A daily brief does not move that needle. You pay Anthropic
-          directly; Cueline takes nothing.
-        </p>
+        <p className="mt-4 max-w-2xl text-lg text-muted">{t("cost.sub")}</p>
       </div>
 
       {/* The one full-width band on the page. Numbers are the argument here,
@@ -339,9 +311,9 @@ function Cost() {
           <table className="w-full min-w-[520px] text-left">
             <thead>
               <tr className="text-xs tracking-wide text-faint uppercase">
-                <th className="py-5 font-normal">Usage</th>
-                <th className="py-5 font-normal">Roughly</th>
-                <th className="py-5 text-right font-normal">Cost</th>
+                <th className="py-5 font-normal">{t("cost.th1")}</th>
+                <th className="py-5 font-normal">{t("cost.th2")}</th>
+                <th className="py-5 text-right font-normal">{t("cost.th3")}</th>
               </tr>
             </thead>
             <tbody>
@@ -363,19 +335,11 @@ function Cost() {
 }
 
 function Limits() {
+  const t = useT();
   const items = [
-    [
-      "It does not log into anyone's Claude account",
-      "Cueline talks to the Anthropic API with a key you own. It does not drive claude.ai, and it never asks for a Claude password.",
-    ],
-    [
-      "It does not run with the tab closed",
-      "The clock counts against a fixed target rather than ticking down, so a backgrounded tab, a locked screen, or a laptop waking from sleep all still fire on time. A closed tab does not. Firing from a server needs somewhere to keep your key, and that is a trade we did not want to make in v1.",
-    ],
-    [
-      "It does not keep your replies",
-      "Answers live in the page until you clear them. Nothing is written anywhere we control.",
-    ],
+    [t("limits.1t"), t("limits.1d")],
+    [t("limits.2t"), t("limits.2d")],
+    [t("limits.3t"), t("limits.3d")],
   ];
 
   return (
@@ -385,23 +349,21 @@ function Limits() {
           className="text-3xl font-semibold sm:text-4xl"
           style={{ letterSpacing: "-0.03em" }}
         >
-          What it deliberately won&rsquo;t do
+          {t("limits.h")}
         </h2>
-        <p className="mt-4 max-w-2xl text-lg text-muted">
-          Worth reading before you decide it fits.
-        </p>
+        <p className="mt-4 max-w-2xl text-lg text-muted">{t("limits.sub")}</p>
 
         {/* Deliberately not cards. These are admissions, and putting each one
             in its own tidy box makes them read as features. A plain divided
             list reads as a list of facts, which is what they are. */}
         <dl className="mt-12 max-w-3xl">
-          {items.map(([t, d]) => (
+          {items.map(([title, body]) => (
             <div
-              key={t}
+              key={title}
               className="grid gap-2 border-t border-line py-7 last:border-b sm:grid-cols-[1fr_1.4fr] sm:gap-10"
             >
-              <dt className="font-medium">{t}</dt>
-              <dd className="m-0 leading-relaxed text-muted">{d}</dd>
+              <dt className="font-medium">{title}</dt>
+              <dd className="m-0 leading-relaxed text-muted">{body}</dd>
             </div>
           ))}
         </dl>
@@ -411,11 +373,9 @@ function Limits() {
             href="/console"
             className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
           >
-            Open the console
+            {t("limits.cta")}
           </Link>
-          <span className="text-sm text-faint">
-            Takes a minute. Nothing to sign up for.
-          </span>
+          <span className="text-sm text-faint">{t("limits.note")}</span>
         </div>
       </div>
     </section>
@@ -423,20 +383,19 @@ function Limits() {
 }
 
 function Footer() {
+  const t = useT();
   return (
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <Mark size={22} />
-          <span className="text-sm text-muted">
-            Cueline — scheduled prompts, no credentials held.
-          </span>
+          <span className="text-sm text-muted">{t("footer.tag")}</span>
         </div>
         <a
           href="https://github.com/bryankwandou/cueline"
           className="text-sm text-faint transition-colors duration-150 hover:text-fg"
         >
-          Source on GitHub
+          {t("footer.src")}
         </a>
       </div>
     </footer>
