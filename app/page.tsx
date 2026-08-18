@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
+import { LiveClock } from "@/components/live-clock";
 
 export default function Landing() {
   return (
@@ -42,7 +43,7 @@ function Nav() {
           </a>
           <Link
             href="/console"
-            className="rounded-[10px] bg-fg px-4 py-2 font-medium text-bg transition-opacity duration-150 hover:opacity-85"
+            className="rounded-[var(--r-control)] bg-fg px-4 py-2 font-medium text-bg transition-opacity duration-150 hover:opacity-85"
           >
             Open console
           </Link>
@@ -82,13 +83,13 @@ function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link
               href="/console"
-              className="rounded-[10px] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
+              className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
             >
               Queue your first cue
             </Link>
             <a
               href="#key"
-              className="rounded-[10px] border border-line-strong px-6 py-3 font-medium text-fg transition-colors duration-150 hover:bg-panel"
+              className="rounded-[var(--r-control)] border border-line-strong px-6 py-3 font-medium text-fg transition-colors duration-150 hover:bg-panel"
             >
               Where does my key go?
             </a>
@@ -107,7 +108,7 @@ function Hero() {
 
 function TimerCard() {
   return (
-    <div className="rise rounded-[14px] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
+    <div className="rise rounded-[var(--r-hero)] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
       <div className="flex items-center justify-between border-b border-line pb-4">
         <span className="text-xs tracking-wide text-faint uppercase">
           Next fire
@@ -118,12 +119,11 @@ function TimerCard() {
         </span>
       </div>
 
-      <div className="tnum flex items-baseline justify-center gap-1.5 py-9 font-mono text-5xl font-medium sm:text-6xl">
-        <span>06</span>
-        <span className="text-faint">:</span>
-        <span>42</span>
-        <span className="text-faint">:</span>
-        <span className="text-accent">05</span>
+      <div className="py-9">
+        <LiveClock />
+        <p className="mt-3 text-center text-xs text-faint">
+          counting to your next 07:00
+        </p>
       </div>
 
       <div className="space-y-2.5">
@@ -134,7 +134,7 @@ function TimerCard() {
         ].map((line, i) => (
           <div
             key={line}
-            className="flex items-start gap-3 rounded-[10px] border border-line bg-bg-raised px-4 py-3"
+            className="flex items-start gap-3 rounded-[var(--r-control)] border border-line bg-bg-raised px-4 py-3"
           >
             <span className="tnum mt-0.5 font-mono text-xs text-faint">
               0{i + 1}
@@ -215,18 +215,38 @@ function Steps() {
         stop thinking about it.
       </p>
 
-      <div className="mt-14 grid gap-5 md:grid-cols-3">
-        {steps.map((s) => (
-          <div
+      {/* A rail, not a three-up card grid: the product is a queue on a
+          timeline, so the layout is the same shape as the thing it sells.
+          Each step indents further and narrows, so the eye falls down the
+          line instead of scanning across equal boxes. */}
+      <ol className="relative mt-16 ml-3 border-l border-line pl-9 sm:ml-6 sm:pl-12">
+        {steps.map((s, i) => (
+          <li
             key={s.n}
-            className="rounded-[14px] border border-line bg-panel p-7 transition-colors duration-150 hover:bg-panel-hover"
+            className="relative pb-14 last:pb-0"
+            style={{ marginLeft: `${i * 1.75}rem` }}
           >
+            <span
+              className="absolute top-1.5 h-2.5 w-2.5 rounded-full bg-accent"
+              style={{ left: "calc(-2.25rem - 5px)" }}
+              aria-hidden="true"
+            />
             <span className="tnum font-mono text-sm text-accent">{s.n}</span>
-            <h3 className="mt-4 text-lg font-medium">{s.t}</h3>
-            <p className="mt-3 leading-relaxed text-muted">{s.d}</p>
-          </div>
+            <h3
+              className="mt-2 text-2xl font-medium"
+              style={{ letterSpacing: "-0.025em" }}
+            >
+              {s.t}
+            </h3>
+            <p
+              className="mt-3 leading-relaxed text-muted"
+              style={{ maxWidth: `${34 - i * 3}rem` }}
+            >
+              {s.d}
+            </p>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   );
 }
@@ -256,7 +276,7 @@ function KeyStory() {
             </p>
           </div>
 
-          <div className="rounded-[14px] border border-line bg-panel p-7">
+          <div className="rounded-[var(--r-panel)] border border-line bg-panel p-7">
             <div className="space-y-4 font-mono text-sm">
               {[
                 ["browser", "holds the key", true],
@@ -309,7 +329,7 @@ function Cost() {
         directly; Cueline takes nothing.
       </p>
 
-      <div className="mt-12 overflow-x-auto rounded-[14px] border border-line">
+      <div className="mt-12 overflow-x-auto rounded-[var(--r-panel)] border border-line">
         <table className="w-full min-w-[520px] text-left">
           <thead>
             <tr className="border-b border-line bg-panel text-xs tracking-wide text-faint uppercase">
@@ -366,19 +386,25 @@ function Limits() {
           Worth reading before you decide it fits.
         </p>
 
-        <div className="mt-12 space-y-px overflow-hidden rounded-[14px] border border-line">
+        {/* Deliberately not cards. These are admissions, and putting each one
+            in its own tidy box makes them read as features. A plain divided
+            list reads as a list of facts, which is what they are. */}
+        <dl className="mt-12 max-w-3xl">
           {items.map(([t, d]) => (
-            <div key={t} className="bg-panel p-7">
-              <h3 className="font-medium">{t}</h3>
-              <p className="mt-2.5 leading-relaxed text-muted">{d}</p>
+            <div
+              key={t}
+              className="grid gap-2 border-t border-line py-7 last:border-b sm:grid-cols-[1fr_1.4fr] sm:gap-10"
+            >
+              <dt className="font-medium">{t}</dt>
+              <dd className="m-0 leading-relaxed text-muted">{d}</dd>
             </div>
           ))}
-        </div>
+        </dl>
 
         <div className="mt-14 flex flex-wrap items-center gap-4">
           <Link
             href="/console"
-            className="rounded-[10px] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
+            className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
           >
             Open the console
           </Link>

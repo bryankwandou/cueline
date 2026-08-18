@@ -220,7 +220,7 @@ export default function Console() {
         <div className="space-y-6">
           <Panel title="Timer">
             <div
-              className={`tnum flex items-baseline justify-center gap-1.5 rounded-[10px] border border-line bg-bg-raised py-8 font-mono text-5xl font-medium ${
+              className={`tnum flex items-baseline justify-center gap-1.5 rounded-[var(--r-control)] border border-line bg-bg-raised py-8 font-mono text-5xl font-medium ${
                 armed ? "armed" : ""
               }`}
             >
@@ -240,7 +240,7 @@ export default function Console() {
             {armed ? (
               <button
                 onClick={disarm}
-                className="mt-4 w-full rounded-[10px] border border-line-strong py-3 font-medium transition-colors duration-150 hover:bg-panel-hover"
+                className="mt-4 w-full rounded-[var(--r-control)] border border-line-strong py-3 font-medium transition-colors duration-150 hover:bg-panel-hover"
               >
                 Cancel
               </button>
@@ -248,7 +248,7 @@ export default function Console() {
               <button
                 onClick={arm}
                 disabled={!canArm}
-                className="mt-4 w-full rounded-[10px] bg-accent py-3 font-medium text-[#1a1206] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+                className="mt-4 w-full rounded-[var(--r-control)] bg-accent py-3 font-medium text-[#1a1206] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 Arm the queue
               </button>
@@ -277,7 +277,7 @@ export default function Console() {
                   key={value}
                   onClick={() => setMode(value)}
                   disabled={armed}
-                  className={`rounded-[10px] border py-2.5 text-sm transition-colors duration-150 disabled:opacity-40 ${
+                  className={`rounded-[var(--r-control)] border py-2.5 text-sm transition-colors duration-150 disabled:opacity-40 ${
                     mode === value
                       ? "border-accent-line bg-accent-dim text-fg"
                       : "border-line text-muted hover:bg-panel-hover"
@@ -303,7 +303,7 @@ export default function Console() {
                 placeholder="sk-ant-…"
                 autoComplete="off"
                 spellCheck={false}
-                className="w-full rounded-[10px] border border-line bg-bg-raised px-3.5 py-2.5 font-mono text-sm outline-none transition-colors duration-150 focus:border-accent-line"
+                className="w-full rounded-[var(--r-control)] border border-line bg-bg-raised px-3.5 py-2.5 font-mono text-sm outline-none transition-colors duration-150 focus:border-accent-line"
               />
               <div className="mt-3 flex items-center justify-between">
                 <a
@@ -345,7 +345,7 @@ export default function Console() {
         {/* ---------------- queue ---------------- */}
         <div className="space-y-6">
           {notice && (
-            <div className="rounded-[14px] border border-accent-line bg-accent-dim px-5 py-4 text-sm">
+            <div className="rounded-[var(--r-panel)] border border-accent-line bg-accent-dim px-5 py-4 text-sm">
               {notice}
             </div>
           )}
@@ -360,12 +360,12 @@ export default function Console() {
                 }}
                 rows={2}
                 placeholder="What would you have typed? e.g. Summarise yesterday's commits into three bullets."
-                className="flex-1 resize-none rounded-[10px] border border-line bg-bg-raised px-3.5 py-3 text-sm leading-relaxed outline-none transition-colors duration-150 focus:border-accent-line"
+                className="flex-1 resize-none rounded-[var(--r-control)] border border-line bg-bg-raised px-3.5 py-3 text-sm leading-relaxed outline-none transition-colors duration-150 focus:border-accent-line"
               />
               <button
                 onClick={addCue}
                 disabled={!draft.trim()}
-                className="rounded-[10px] border border-line-strong px-5 py-3 text-sm font-medium transition-colors duration-150 hover:bg-panel-hover disabled:opacity-30 sm:self-start"
+                className="rounded-[var(--r-control)] border border-line-strong px-5 py-3 text-sm font-medium transition-colors duration-150 hover:bg-panel-hover disabled:opacity-30 sm:self-start"
               >
                 Add
               </button>
@@ -409,7 +409,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[14px] border border-line bg-panel p-6">
+    <section className="rounded-[var(--r-panel)] border border-line bg-panel p-6">
       <h2 className="mb-4 text-xs tracking-wide text-faint uppercase">
         {title}
       </h2>
@@ -443,7 +443,7 @@ function NumField({
         onChange={(e) =>
           onChange(Math.max(0, Math.min(max, Number(e.target.value) || 0)))
         }
-        className="tnum w-full rounded-[10px] border border-line bg-bg-raised px-3 py-2 text-center font-mono outline-none transition-colors duration-150 focus:border-accent-line disabled:opacity-40"
+        className="tnum w-full rounded-[var(--r-control)] border border-line bg-bg-raised px-3 py-2 text-center font-mono outline-none transition-colors duration-150 focus:border-accent-line disabled:opacity-40"
       />
     </label>
   );
@@ -470,7 +470,7 @@ function CueRow({
           : "bg-faint";
 
   return (
-    <li className="rounded-[10px] border border-line bg-bg-raised">
+    <li className="rounded-[var(--r-control)] border border-line bg-bg-raised">
       <div className="flex items-start gap-3.5 px-4 py-3.5">
         <span className="tnum mt-0.5 font-mono text-xs text-faint">
           {String(index + 1).padStart(2, "0")}
