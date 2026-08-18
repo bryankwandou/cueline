@@ -316,42 +316,46 @@ function Cost() {
   ];
 
   return (
-    <section id="cost" className="mx-auto max-w-6xl px-6 py-24">
-      <h2
-        className="text-3xl font-semibold sm:text-4xl"
-        style={{ letterSpacing: "-0.03em" }}
-      >
-        It costs about a nickel a month
-      </h2>
-      <p className="mt-4 max-w-2xl text-lg text-muted">
-        Haiku 4.5 is priced at $1 per million input tokens and $5 per million
-        output. A daily brief does not move that needle. You pay Anthropic
-        directly; Cueline takes nothing.
-      </p>
+    <section id="cost" className="overflow-hidden py-24">
+      <div className="mx-auto max-w-6xl px-6">
+        <h2
+          className="text-3xl font-semibold sm:text-4xl"
+          style={{ letterSpacing: "-0.03em" }}
+        >
+          It costs about a nickel a month
+        </h2>
+        <p className="mt-4 max-w-2xl text-lg text-muted">
+          Haiku 4.5 is priced at $1 per million input tokens and $5 per million
+          output. A daily brief does not move that needle. You pay Anthropic
+          directly; Cueline takes nothing.
+        </p>
+      </div>
 
-      <div className="mt-12 overflow-x-auto rounded-[var(--r-panel)] border border-line">
-        <table className="w-full min-w-[520px] text-left">
-          <thead>
-            <tr className="border-b border-line bg-panel text-xs tracking-wide text-faint uppercase">
-              <th className="px-6 py-4 font-normal">Usage</th>
-              <th className="px-6 py-4 font-normal">Roughly</th>
-              <th className="px-6 py-4 text-right font-normal">Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(([a, b, c]) => (
-              <tr key={a} className="border-b border-line last:border-0">
-                <td className="px-6 py-4">{a}</td>
-                <td className="tnum px-6 py-4 font-mono text-sm text-muted">
-                  {b}
-                </td>
-                <td className="tnum px-6 py-4 text-right font-mono text-accent">
-                  {c}
-                </td>
+      {/* The one full-width band on the page. Numbers are the argument here,
+          so they get the whole horizon instead of another bordered box. */}
+      <div className="bleed mt-14 border-y border-line bg-bg-raised/40">
+        <div className="mx-auto max-w-5xl overflow-x-auto px-6">
+          <table className="w-full min-w-[520px] text-left">
+            <thead>
+              <tr className="text-xs tracking-wide text-faint uppercase">
+                <th className="py-5 font-normal">Usage</th>
+                <th className="py-5 font-normal">Roughly</th>
+                <th className="py-5 text-right font-normal">Cost</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map(([a, b, c]) => (
+                <tr key={a} className="border-t border-line">
+                  <td className="py-6 text-lg">{a}</td>
+                  <td className="tnum py-6 font-mono text-sm text-muted">{b}</td>
+                  <td className="tnum py-6 text-right font-mono text-2xl text-accent">
+                    {c}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );
