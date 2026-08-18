@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Mark, Wordmark } from "@/components/logo";
+import { LangToggle } from "@/components/lang-toggle";
 import { load, save, drop } from "@/lib/storage";
 import {
   estimateCost,
@@ -297,6 +298,7 @@ export default function Console() {
               </span>
             )}
             {firing && <span className="text-muted">Running the queue…</span>}
+            <LangToggle />
           </div>
         </div>
       </header>
