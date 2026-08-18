@@ -298,8 +298,9 @@ function KeyStory() {
               ))}
             </div>
             <p className="mt-6 text-xs leading-relaxed text-faint">
-              Because storage is local, cues fire while the tab is open. That is
-              the honest trade for not holding anyone&rsquo;s credentials.
+              Because storage is local, cues fire while the tab is open —
+              backgrounded is fine, closed is not. That is the honest trade for
+              not holding anyone&rsquo;s credentials.
             </p>
           </div>
         </div>
@@ -369,7 +370,7 @@ function Limits() {
     ],
     [
       "It does not run with the tab closed",
-      "The timer lives in your browser. Server-side firing needs somewhere to keep your key, and that is a trade we did not want to make in v1.",
+      "The clock counts against a fixed target rather than ticking down, so a backgrounded tab, a locked screen, or a laptop waking from sleep all still fire on time. A closed tab does not. Firing from a server needs somewhere to keep your key, and that is a trade we did not want to make in v1.",
     ],
     [
       "It does not keep your replies",
