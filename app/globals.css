@@ -26,8 +26,14 @@
   --warn: #f0a53c;
   --bad: #f2726b;
 
-  --radius: 10px;
-  --radius-lg: 14px;
+  /* Radius carries role, not decoration. Inputs sit tight against their
+     labels; panels breathe; the hero object is the roundest thing on the
+     page because it is the one you are meant to look at. */
+  --r-field: 7px;
+  --r-control: 10px;
+  --r-panel: 14px;
+  --r-hero: 22px;
+  --r-pill: 999px;
 
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
