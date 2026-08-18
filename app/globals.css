@@ -165,3 +165,34 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* --- Chosen typefaces ------------------------------------------
+   Unlayered on purpose: these sit after Tailwind's layers so they
+   win without !important. Display face on headings only; the mono
+   carries every numeral, because the countdown is the hero object. */
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.font-mono,
+code,
+pre,
+kbd {
+  font-family: var(--font-jetbrains), ui-monospace, "Cascadia Mono", Consolas,
+    monospace;
+}
+
+/* --- Rhythm break ----------------------------------------------
+   Every other section is a centred 72rem column. This one runs the
+   full width so the page has a horizon line in it somewhere. */
+
+.bleed {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
