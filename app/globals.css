@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Cueline design tokens — Warm Monochrome x Stark Minimal.
+   One accent (signal amber). Everything else is a warm gray ramp.
+   Dark-native: the dark values are the design, light is the port.
+   --------------------------------------------------------------- */
+
+:root {
+  --bg: #0b0b0c;
+  --bg-raised: #131314;
+  --panel: #171718;
+  --panel-hover: #1d1d1f;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  --fg: #ededec;
+  --fg-muted: #8d8d87;
+  --fg-faint: #5e5e5a;
+
+  --accent: #f0a53c;
+  --accent-dim: rgba(240, 165, 60, 0.14);
+  --accent-line: rgba(240, 165, 60, 0.32);
+
+  --ok: #5bd08a;
+  --warn: #f0a53c;
+  --bad: #f2726b;
+
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:root[data-theme="light"] {
+  --bg: #faf9f7;
+  --bg-raised: #ffffff;
+  --panel: #ffffff;
+  --panel-hover: #f4f3f0;
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  --fg: #17171a;
+  --fg-muted: #6a6a66;
+  --fg-faint: #97978f;
+
+  --accent: #b7761a;
+  --accent-dim: rgba(183, 118, 26, 0.1);
+  --accent-line: rgba(183, 118, 26, 0.3);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-panel: var(--panel);
+  --color-panel-hover: var(--panel-hover);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-faint: var(--fg-faint);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-ok: var(--ok);
+  --color-bad: var(--bad);
+
+  --font-sans: ui-sans-serif, -apple-system, "Segoe UI Variable Display",
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "JetBrains Mono", Menlo, Consolas,
+    monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-dim);
+  color: var(--fg);
+}
+
+/* Tabular numerals everywhere a number is compared vertically. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Grain: a barely-there texture so large dark fields don't band. */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- Motion: entry longer than exit, no bounce ------------------ */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 480ms var(--ease) both;
+}
+
+@keyframes sweep {
+  from {
+    stroke-dashoffset: 190;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-dim);
+  }
+  70% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.armed {
+  animation: pulse-ring 2.4s var(--ease) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
