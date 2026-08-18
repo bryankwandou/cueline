@@ -24,6 +24,8 @@ export default function Console() {
 
   const [armed, setArmed] = useState(false);
   const [remaining, setRemaining] = useState(0);
+  // Absolute epoch ms the queue is due to run. Survives tab throttling.
+  const [fireAt, setFireAt] = useState<number | null>(null);
   const [firing, setFiring] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -50,6 +52,7 @@ export default function Console() {
   /* ---- the clock ------------------------------------------------ */
   const fire = useCallback(async () => {
     setArmed(false);
+    setFireAt(null);
     setFiring(true);
 
     if (mode === "reminder") {
@@ -115,20 +118,39 @@ export default function Console() {
     }
   }, [apiKey, cues, mode]);
 
+  /**
+   * Count against the wall clock, not by subtracting one per tick.
+   *
+   * Browsers throttle timers in background tabs to roughly once a minute, so
+   * a decrementing counter drifts badly the moment someone switches away —
+   * which is exactly what this product asks people to do. Deriving the
+   * remainder from a fixed target means the tab can be throttled, suspended,
+   * or restored from sleep and still fire at the right moment (late, but
+   * never early and never skipped).
+   */
   useEffect(() => {
-    if (!armed) return;
-    const tick = setInterval(() => {
-      setRemaining((r) => {
-        if (r <= 1) {
-          clearInterval(tick);
-          void fire();
-          return 0;
-        }
-        return r - 1;
-      });
-    }, 1000);
-    return () => clearInterval(tick);
-  }, [armed, fire]);
+    if (!armed || fireAt === null) return;
+
+    const evaluate = () => {
+      const left = Math.ceil((fireAt - Date.now()) / 1000);
+      setRemaining(Math.max(0, left));
+      if (left <= 0) {
+        clearInterval(tick);
+        document.removeEventListener("visibilitychange", evaluate);
+        void fire();
+      }
+    };
+
+    const tick = setInterval(evaluate, 500);
+    // Catch up the instant the tab comes back, rather than on the next tick.
+    document.addEventListener("visibilitychange", evaluate);
+    evaluate();
+
+    return () => {
+      clearInterval(tick);
+      document.removeEventListener("visibilitychange", evaluate);
+    };
+  }, [armed, fireAt, fire]);
 
   /* ---- derived -------------------------------------------------- */
   const totalCost = useMemo(
@@ -155,6 +177,67 @@ export default function Console() {
     (mode === "reminder" || apiKey.trim().length > 0);
 
   /* ---- actions -------------------------------------------------- */
+  /**
+   * Local storage is not a database, and browsers clear it — on a reset, a
+   * profile wipe, or a "clear site data" click. Rather than answer that by
+   * holding people's queues on a server we do not want to run, the queue is
+   * a file they own: exported as plain JSON, restored on any machine.
+   *
+   * The API key is deliberately not part of the export. A file that carries
+   * a live credential is a file that leaks one.
+   */
+  function exportQueue() {
+    const payload = {
+      app: "cueline",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      cues: cues.map((c) => ({ body: c.body })),
+    };
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cueline-queue-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setNotice(
+      `Saved ${cues.length} cue${cues.length === 1 ? "" : "s"} to a file. Your key is not in it.`,
+    );
+  }
+
+  async function importQueue(file: File) {
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      const raw =
+        typeof parsed === "object" && parsed !== null && "cues" in parsed
+          ? (parsed as { cues: unknown }).cues
+          : null;
+
+      if (!Array.isArray(raw)) throw new Error("no cue list in that file");
+
+      const restored = raw
+        .map((c) =>
+          typeof c === "object" && c !== null && "body" in c
+            ? String((c as { body: unknown }).body)
+            : "",
+        )
+        .filter((body) => body.trim().length > 0)
+        .map((body) => ({ id: newId(), body, status: "queued" as const }));
+
+      if (restored.length === 0) throw new Error("that file had no cues in it");
+
+      setCues(restored);
+      setNotice(
+        `Restored ${restored.length} cue${restored.length === 1 ? "" : "s"}.`,
+      );
+    } catch (err) {
+      setNotice(
+        `Could not read that file — ${err instanceof Error ? err.message : "unknown problem"}.`,
+      );
+    }
+  }
+
   function addCue() {
     const body = draft.trim();
     if (!body) return;
@@ -176,8 +259,10 @@ export default function Console() {
         error: undefined,
       })),
     );
+    const total = h * 3600 + m * 60 + s;
     setNotice(null);
-    setRemaining(h * 3600 + m * 60 + s);
+    setRemaining(total);
+    setFireAt(Date.now() + total * 1000);
     setArmed(true);
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       void Notification.requestPermission();
@@ -186,6 +271,7 @@ export default function Console() {
 
   function disarm() {
     setArmed(false);
+    setFireAt(null);
     setRemaining(0);
   }
 
@@ -369,6 +455,32 @@ export default function Console() {
               >
                 Add
               </button>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
+              <button
+                onClick={exportQueue}
+                disabled={cues.length === 0}
+                className="text-muted underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline disabled:opacity-30 disabled:no-underline"
+              >
+                Save queue to a file
+              </button>
+              <label className="cursor-pointer text-muted underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline">
+                Restore from a file
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void importQueue(f);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+              <span className="text-faint">
+                Survives a browser reset. The key is never in the file.
+              </span>
             </div>
 
             {cues.length === 0 ? (
