@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Mark, Wordmark } from "@/components/logo";
 import { LangToggle } from "@/components/lang-toggle";
+import { useT } from "@/lib/i18n";
 import { load, save, drop } from "@/lib/storage";
 import {
   estimateCost,
@@ -14,6 +15,8 @@ import {
 } from "@/lib/types";
 
 export default function Console() {
+  const t = useT();
+
   const [apiKey, setApiKey] = useState("");
   const [mode, setMode] = useState<RunMode>("execute");
   const [cues, setCues] = useState<Cue[]>([]);
@@ -57,10 +60,13 @@ export default function Console() {
     setFiring(true);
 
     if (mode === "reminder") {
-      setNotice("Time is up. Your cues are below, ready to copy.");
-      if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      setNotice(t("c.dueNotice"));
+      if (
+        typeof Notification !== "undefined" &&
+        Notification.permission === "granted"
+      ) {
         new Notification("Cueline", {
-          body: `${cues.length} cue${cues.length === 1 ? "" : "s"} are due.`,
+          body: t("c.dueBody", { a: cues.length }),
         });
       }
       setFiring(false);
@@ -82,7 +88,7 @@ export default function Console() {
         });
         const data = (await res.json()) as RunResponse & { error?: string };
 
-        if (!res.ok) throw new Error(data.error ?? "The call failed.");
+        if (!res.ok) throw new Error(data.error ?? t("c.callFailed"));
 
         setCues((prev) =>
           prev.map((c) =>
@@ -105,7 +111,8 @@ export default function Console() {
               ? {
                   ...c,
                   status: "failed",
-                  error: err instanceof Error ? err.message : "Unknown failure.",
+                  error:
+                    err instanceof Error ? err.message : t("c.unknownFailure"),
                 }
               : c,
           ),
@@ -114,10 +121,13 @@ export default function Console() {
     }
 
     setFiring(false);
-    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-      new Notification("Cueline", { body: "Your queue has finished running." });
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted"
+    ) {
+      new Notification("Cueline", { body: t("c.finishedBody") });
     }
-  }, [apiKey, cues, mode]);
+  }, [apiKey, cues, mode, t]);
 
   /**
    * Count against the wall clock, not by subtracting one per tick.
@@ -175,9 +185,24 @@ export default function Console() {
   // How much of the queue has resolved, either way. Drives the progress bar
   // and the header count; a failed cue still counts as dealt with.
   const finished = useMemo(
-    () => cues.filter((c) => c.status === "done" || c.status === "failed").length,
+    () =>
+      cues.filter((c) => c.status === "done" || c.status === "failed").length,
     [cues],
   );
+
+  /**
+   * A duration is easy to type and hard to picture. Showing the wall-clock
+   * time it lands on turns "02:45:00" into something you can sanity-check
+   * against the morning you actually had in mind.
+   */
+  const landsAt = useMemo(() => {
+    const total = armed ? remaining : h * 3600 + m * 60 + s;
+    if (total <= 0) return null;
+    return new Date(Date.now() + total * 1000).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [armed, remaining, h, m, s]);
 
   const canArm =
     cues.length > 0 &&
@@ -209,9 +234,7 @@ export default function Console() {
     a.download = `cueline-queue-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setNotice(
-      `Saved ${cues.length} cue${cues.length === 1 ? "" : "s"} to a file. Your key is not in it.`,
-    );
+    setNotice(t("c.exported", { a: cues.length }));
   }
 
   async function importQueue(file: File) {
@@ -222,7 +245,7 @@ export default function Console() {
           ? (parsed as { cues: unknown }).cues
           : null;
 
-      if (!Array.isArray(raw)) throw new Error("no cue list in that file");
+      if (!Array.isArray(raw)) throw new Error(t("c.importNoList"));
 
       const restored = raw
         .map((c) =>
@@ -233,15 +256,15 @@ export default function Console() {
         .filter((body) => body.trim().length > 0)
         .map((body) => ({ id: newId(), body, status: "queued" as const }));
 
-      if (restored.length === 0) throw new Error("that file had no cues in it");
+      if (restored.length === 0) throw new Error(t("c.importEmpty"));
 
       setCues(restored);
-      setNotice(
-        `Restored ${restored.length} cue${restored.length === 1 ? "" : "s"}.`,
-      );
+      setNotice(t("c.imported", { a: restored.length }));
     } catch (err) {
       setNotice(
-        `Could not read that file — ${err instanceof Error ? err.message : "unknown problem"}.`,
+        t("c.importBad", {
+          a: err instanceof Error ? err.message : t("c.unknownProblem"),
+        }),
       );
     }
   }
@@ -255,6 +278,26 @@ export default function Console() {
 
   function removeCue(id: string) {
     setCues((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function editCue(id: string, body: string) {
+    setCues((prev) => prev.map((c) => (c.id === id ? { ...c, body } : c)));
+  }
+
+  /**
+   * The product sells an ordered queue, so the order has to be editable.
+   * Buttons rather than drag: this list is short, the rows are tall, and a
+   * drag handle is the one control that stops working entirely on a phone
+   * and for anyone driving the page from a keyboard.
+   */
+  function moveCue(index: number, direction: -1 | 1) {
+    setCues((prev) => {
+      const to = index + direction;
+      if (to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[to]] = [next[to], next[index]];
+      return next;
+    });
   }
 
   function arm() {
@@ -272,7 +315,10 @@ export default function Console() {
     setRemaining(total);
     setFireAt(Date.now() + total * 1000);
     setArmed(true);
-    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
       void Notification.requestPermission();
     }
   }
@@ -286,7 +332,7 @@ export default function Console() {
   function forgetKey() {
     setApiKey("");
     drop("key");
-    setNotice("Key cleared from this browser.");
+    setNotice(t("c.keyCleared"));
   }
 
   /* ---- view ----------------------------------------------------- */
@@ -301,12 +347,12 @@ export default function Console() {
             {armed && (
               <span className="flex items-center gap-2 text-accent">
                 <span className="armed h-1.5 w-1.5 rounded-full bg-accent" />
-                Armed
+                {t("c.armed")}
               </span>
             )}
             {firing && (
               <span className="text-muted">
-                Running cue {finished + 1} of {cues.length}
+                {t("c.running", { a: finished + 1, b: cues.length })}
               </span>
             )}
             <LangToggle />
@@ -317,7 +363,7 @@ export default function Console() {
       <main className="mx-auto grid max-w-6xl gap-6 px-6 py-10 lg:grid-cols-[360px_1fr]">
         {/* ---------------- left rail ---------------- */}
         <div className="space-y-6">
-          <Panel title="Timer">
+          <Panel title={t("c.timer")}>
             <div
               className={`tnum flex items-baseline justify-center gap-1.5 rounded-[var(--r-control)] border border-line bg-bg-raised py-8 font-mono text-5xl font-medium ${
                 armed ? "armed" : ""
@@ -330,10 +376,34 @@ export default function Console() {
               <span className={armed ? "text-accent" : ""}>{clock.s}</span>
             </div>
 
+            {landsAt && (
+              <p className="tnum mt-3 text-center font-mono text-xs text-faint">
+                {t("c.fireAt", { a: landsAt })}
+              </p>
+            )}
+
             <div className="mt-4 grid grid-cols-3 gap-3">
-              <NumField label="hours" value={h} onChange={setH} max={23} disabled={armed} />
-              <NumField label="minutes" value={m} onChange={setM} max={59} disabled={armed} />
-              <NumField label="seconds" value={s} onChange={setS} max={59} disabled={armed} />
+              <NumField
+                label={t("c.hours")}
+                value={h}
+                onChange={setH}
+                max={23}
+                disabled={armed}
+              />
+              <NumField
+                label={t("c.minutes")}
+                value={m}
+                onChange={setM}
+                max={59}
+                disabled={armed}
+              />
+              <NumField
+                label={t("c.seconds")}
+                value={s}
+                onChange={setS}
+                max={59}
+                disabled={armed}
+              />
             </div>
 
             {armed ? (
@@ -341,35 +411,35 @@ export default function Console() {
                 onClick={disarm}
                 className="press mt-4 w-full rounded-[var(--r-control)] border border-line-strong py-3 font-medium hover:bg-panel-hover"
               >
-                Cancel
+                {t("c.cancel")}
               </button>
             ) : (
               <button
                 onClick={arm}
                 disabled={!canArm}
-                className="press mt-4 w-full rounded-[var(--r-control)] bg-accent py-3 font-medium text-[#1a1206] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:active:transform-none"
+                className="press mt-4 w-full rounded-[var(--r-control)] bg-accent py-3 font-medium text-[#1a1206] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
               >
-                Arm the queue
+                {t("c.arm")}
               </button>
             )}
 
             {!canArm && !armed && (
               <p className="mt-3 text-xs leading-relaxed text-faint">
                 {cues.length === 0
-                  ? "Add at least one cue below."
+                  ? t("c.needCue")
                   : mode === "execute" && !apiKey.trim()
-                    ? "Paste an API key, or switch to reminder mode."
-                    : "Set a duration above zero."}
+                    ? t("c.needKey")
+                    : t("c.needTime")}
               </p>
             )}
           </Panel>
 
-          <Panel title="Mode">
+          <Panel title={t("c.mode")}>
             <div className="grid grid-cols-2 gap-2">
               {(
                 [
-                  ["execute", "Run them"],
-                  ["reminder", "Just remind me"],
+                  ["execute", t("c.modeRun")],
+                  ["reminder", t("c.modeRemind")],
                 ] as [RunMode, string][]
               ).map(([value, label]) => (
                 <button
@@ -387,14 +457,12 @@ export default function Console() {
               ))}
             </div>
             <p className="mt-3 text-xs leading-relaxed text-faint">
-              {mode === "execute"
-                ? "Cues are sent to Claude Haiku 4.5 with your key when the clock hits zero."
-                : "Nothing is sent anywhere. You get a nudge and the cues laid out to copy."}
+              {mode === "execute" ? t("c.modeRunNote") : t("c.modeRemindNote")}
             </p>
           </Panel>
 
           {mode === "execute" && (
-            <Panel title="API key">
+            <Panel title={t("c.key")}>
               <input
                 type="password"
                 value={apiKey}
@@ -411,32 +479,29 @@ export default function Console() {
                   rel="noreferrer"
                   className="text-xs text-muted underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline"
                 >
-                  Get one from the Console
+                  {t("c.keyGet")}
                 </a>
                 {apiKey && (
                   <button
                     onClick={forgetKey}
                     className="text-xs text-faint transition-colors duration-150 hover:text-bad"
                   >
-                    Forget it
+                    {t("c.keyForget")}
                   </button>
                 )}
               </div>
               <p className="mt-3 text-xs leading-relaxed text-faint">
-                Stays in this browser. It is attached to each call as it fires
-                and is not stored on any server.
+                {t("c.keyNote")}
               </p>
             </Panel>
           )}
 
           {totalCost > 0 && (
-            <Panel title="Spent this run">
+            <Panel title={t("c.spent")}>
               <p className="tnum font-mono text-2xl text-accent">
                 ${totalCost.toFixed(5)}
               </p>
-              <p className="mt-2 text-xs text-faint">
-                Billed by Anthropic against your key. Cueline adds nothing.
-              </p>
+              <p className="mt-2 text-xs text-faint">{t("c.spentNote")}</p>
             </Panel>
           )}
         </div>
@@ -453,7 +518,13 @@ export default function Console() {
             </div>
           )}
 
-          <Panel title={`Queue — ${cues.length} cue${cues.length === 1 ? "" : "s"}`}>
+          <Panel
+            title={
+              cues.length === 1
+                ? t("c.queue1")
+                : t("c.queueN", { a: cues.length })
+            }
+          >
             {firing && cues.length > 0 && (
               <div
                 className="progress-track mb-5"
@@ -461,7 +532,10 @@ export default function Console() {
                 aria-valuemin={0}
                 aria-valuemax={cues.length}
                 aria-valuenow={finished}
-                aria-label="Queue progress"
+                aria-label={t("c.running", {
+                  a: finished + 1,
+                  b: cues.length,
+                })}
               >
                 <div
                   className="progress-fill"
@@ -469,6 +543,7 @@ export default function Console() {
                 />
               </div>
             )}
+
             <div className="flex flex-col gap-3 sm:flex-row">
               <textarea
                 value={draft}
@@ -477,15 +552,15 @@ export default function Console() {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) addCue();
                 }}
                 rows={2}
-                placeholder="What would you have typed? e.g. Summarise yesterday's commits into three bullets."
+                placeholder={t("c.draft")}
                 className="flex-1 resize-none rounded-[var(--r-control)] border border-line bg-bg-raised px-3.5 py-3 text-sm leading-relaxed outline-none transition-colors duration-150 focus:border-accent-line"
               />
               <button
                 onClick={addCue}
                 disabled={!draft.trim()}
-                className="press rounded-[var(--r-control)] border border-line-strong px-5 py-3 text-sm font-medium hover:bg-panel-hover disabled:opacity-30 disabled:active:transform-none sm:self-start"
+                className="press rounded-[var(--r-control)] border border-line-strong px-5 py-3 text-sm font-medium hover:bg-panel-hover disabled:opacity-30 sm:self-start"
               >
-                Add
+                {t("c.add")}
               </button>
             </div>
 
@@ -495,10 +570,10 @@ export default function Console() {
                 disabled={cues.length === 0}
                 className="text-muted underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline disabled:opacity-30 disabled:no-underline"
               >
-                Save queue to a file
+                {t("c.export")}
               </button>
               <label className="cursor-pointer text-muted underline-offset-4 transition-colors duration-150 hover:text-fg hover:underline">
-                Restore from a file
+                {t("c.import")}
                 <input
                   type="file"
                   accept="application/json,.json"
@@ -510,17 +585,14 @@ export default function Console() {
                   }}
                 />
               </label>
-              <span className="text-faint">
-                Survives a browser reset. The key is never in the file.
-              </span>
+              <span className="text-faint">{t("c.fileNote")}</span>
             </div>
 
             {cues.length === 0 ? (
               <div className="mt-8 flex flex-col items-center gap-4 py-12 text-center">
                 <Mark size={34} />
                 <p className="max-w-sm leading-relaxed text-muted">
-                  Nothing queued yet. Add the prompt you send most mornings and
-                  it will never need typing again.
+                  {t("c.emptyTitle")}
                 </p>
               </div>
             ) : (
@@ -529,9 +601,12 @@ export default function Console() {
                   <CueRow
                     key={cue.id}
                     index={i}
+                    total={cues.length}
                     cue={cue}
                     locked={armed || firing}
                     onRemove={() => removeCue(cue.id)}
+                    onEdit={(body) => editCue(cue.id, body)}
+                    onMove={(d) => moveCue(i, d)}
                   />
                 ))}
               </ul>
@@ -593,17 +668,67 @@ function NumField({
   );
 }
 
+/**
+ * A button that reports success in place for a moment.
+ *
+ * "Copied" as a toast in the corner asks the eye to leave the thing it just
+ * acted on. Swapping the label is smaller and lands where the pointer
+ * already is.
+ */
+function CopyButton({
+  text,
+  label,
+  done,
+  className = "",
+}: {
+  text: string;
+  label: string;
+  done: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(id);
+  }, [copied]);
+
+  return (
+    <button
+      onClick={() => {
+        void navigator.clipboard.writeText(text).then(() => setCopied(true));
+      }}
+      className={`transition-colors duration-150 ${
+        copied ? "text-ok" : "text-faint hover:text-fg"
+      } ${className}`}
+    >
+      {copied ? done : label}
+    </button>
+  );
+}
+
 function CueRow({
   index,
+  total,
   cue,
   locked,
   onRemove,
+  onEdit,
+  onMove,
 }: {
   index: number;
+  total: number;
   cue: Cue;
   locked: boolean;
   onRemove: () => void;
+  onEdit: (body: string) => void;
+  onMove: (direction: -1 | 1) => void;
 }) {
+  const t = useT();
+  const [editing, setEditing] = useState(false);
+  const [buffer, setBuffer] = useState(cue.body);
+
   const dot =
     cue.status === "done"
       ? "bg-ok"
@@ -613,22 +738,106 @@ function CueRow({
           ? "bg-accent dot-running"
           : "bg-faint";
 
+  function commit() {
+    const body = buffer.trim();
+    if (body) onEdit(body);
+    setEditing(false);
+  }
+
   return (
     <li className="slot-in rounded-[var(--r-control)] border border-line bg-bg-raised">
       <div className="flex items-start gap-3.5 px-4 py-3.5">
         <span className="tnum mt-0.5 font-mono text-xs text-faint">
           {String(index + 1).padStart(2, "0")}
         </span>
-        <p className="flex-1 text-sm leading-relaxed">{cue.body}</p>
+
+        {editing ? (
+          <div className="flex-1">
+            <textarea
+              value={buffer}
+              autoFocus
+              rows={3}
+              onChange={(e) => setBuffer(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) commit();
+                if (e.key === "Escape") {
+                  setBuffer(cue.body);
+                  setEditing(false);
+                }
+              }}
+              className="w-full resize-none rounded-[var(--r-field)] border border-accent-line bg-panel px-3 py-2 text-sm leading-relaxed outline-none"
+            />
+            <div className="mt-2 flex gap-4 text-xs">
+              <button
+                onClick={commit}
+                className="text-accent transition-colors duration-150 hover:text-fg"
+              >
+                {t("c.save")}
+              </button>
+              <button
+                onClick={() => {
+                  setBuffer(cue.body);
+                  setEditing(false);
+                }}
+                className="text-faint transition-colors duration-150 hover:text-fg"
+              >
+                {t("c.discard")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="flex-1 text-sm leading-relaxed">{cue.body}</p>
+        )}
+
         <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
-        {!locked && (
-          <button
-            onClick={onRemove}
-            aria-label="Remove cue"
-            className="mt-0.5 text-xs text-faint transition-colors duration-150 hover:text-bad"
-          >
-            Remove
-          </button>
+
+        {!locked && !editing && (
+          <div className="mt-0.5 flex shrink-0 items-center gap-3 text-xs">
+            {/* Reordering is only meaningful with something to trade places
+                with, so the arrows disappear at the ends of the list rather
+                than sitting there greyed out. */}
+            {index > 0 && (
+              <button
+                onClick={() => onMove(-1)}
+                aria-label={t("c.up")}
+                title={t("c.up")}
+                className="text-faint transition-colors duration-150 hover:text-fg"
+              >
+                ↑
+              </button>
+            )}
+            {index < total - 1 && (
+              <button
+                onClick={() => onMove(1)}
+                aria-label={t("c.down")}
+                title={t("c.down")}
+                className="text-faint transition-colors duration-150 hover:text-fg"
+              >
+                ↓
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setBuffer(cue.body);
+                setEditing(true);
+              }}
+              className="text-faint transition-colors duration-150 hover:text-fg"
+            >
+              {t("c.edit")}
+            </button>
+            <CopyButton
+              text={cue.body}
+              label={t("c.copyCue")}
+              done={t("c.copied")}
+            />
+            <button
+              onClick={onRemove}
+              aria-label={t("c.remove")}
+              className="text-faint transition-colors duration-150 hover:text-bad"
+            >
+              {t("c.remove")}
+            </button>
+          </div>
         )}
       </div>
 
@@ -637,10 +846,24 @@ function CueRow({
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted">
             {cue.reply}
           </p>
-          <p className="tnum mt-3 font-mono text-[11px] text-faint">
-            {cue.tokensIn} in · {cue.tokensOut} out · $
-            {estimateCost(cue.tokensIn ?? 0, cue.tokensOut ?? 0).toFixed(5)}
-          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <p className="tnum font-mono text-[11px] text-faint">
+              {t("c.usage", {
+                a: cue.tokensIn ?? 0,
+                b: cue.tokensOut ?? 0,
+                c: estimateCost(
+                  cue.tokensIn ?? 0,
+                  cue.tokensOut ?? 0,
+                ).toFixed(5),
+              })}
+            </p>
+            <CopyButton
+              text={cue.reply}
+              label={t("c.copy")}
+              done={t("c.copied")}
+              className="text-[11px]"
+            />
+          </div>
         </div>
       )}
 

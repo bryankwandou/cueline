@@ -161,6 +161,106 @@ const dict = {
     id: "Cueline — prompt terjadwal, tanpa memegang kredensial.",
   },
   "footer.src": { en: "Source on GitHub", id: "Kode sumber di GitHub" },
+
+  /* ---- console ------------------------------------------------- */
+
+  "c.armed": { en: "Armed", id: "Siap" },
+  "c.running": { en: "Running cue {a} of {b}", id: "Menjalankan cue {a} dari {b}" },
+
+  "c.timer": { en: "Timer", id: "Pewaktu" },
+  "c.hours": { en: "hours", id: "jam" },
+  "c.minutes": { en: "minutes", id: "menit" },
+  "c.seconds": { en: "seconds", id: "detik" },
+  "c.arm": { en: "Arm the queue", id: "Siapkan antrean" },
+  "c.cancel": { en: "Cancel", id: "Batal" },
+  "c.needCue": { en: "Add at least one cue below.", id: "Tambahkan setidaknya satu cue di bawah." },
+  "c.needKey": {
+    en: "Paste an API key, or switch to reminder mode.",
+    id: "Tempel kunci API, atau pindah ke mode pengingat.",
+  },
+  "c.needTime": { en: "Set a duration above zero.", id: "Atur durasi di atas nol." },
+  "c.fireAt": { en: "Fires at {a}", id: "Menyala pukul {a}" },
+
+  "c.mode": { en: "Mode", id: "Mode" },
+  "c.modeRun": { en: "Run them", id: "Jalankan" },
+  "c.modeRemind": { en: "Just remind me", id: "Ingatkan saja" },
+  "c.modeRunNote": {
+    en: "Cues are sent to Claude Haiku 4.5 with your key when the clock hits zero.",
+    id: "Cue dikirim ke Claude Haiku 4.5 dengan kunci Anda begitu jam mencapai nol.",
+  },
+  "c.modeRemindNote": {
+    en: "Nothing is sent anywhere. You get a nudge and the cues laid out to copy.",
+    id: "Tidak ada yang dikirim ke mana pun. Anda hanya dapat pengingat dan cue yang siap disalin.",
+  },
+
+  "c.key": { en: "API key", id: "Kunci API" },
+  "c.keyGet": { en: "Get one from the Console", id: "Ambil satu dari Console" },
+  "c.keyForget": { en: "Forget it", id: "Lupakan" },
+  "c.keyNote": {
+    en: "Stays in this browser. It is attached to each call as it fires and is not stored on any server.",
+    id: "Tetap di peramban ini. Kunci ikut di tiap panggilan saat menyala dan tidak disimpan di server mana pun.",
+  },
+  "c.keyCleared": { en: "Key cleared from this browser.", id: "Kunci dihapus dari peramban ini." },
+
+  "c.spent": { en: "Spent this run", id: "Terpakai run ini" },
+  "c.spentNote": {
+    en: "Billed by Anthropic against your key. Cueline adds nothing.",
+    id: "Ditagih Anthropic ke kunci Anda. Cueline tidak menambahkan apa pun.",
+  },
+
+  "c.queue1": { en: "Queue — 1 cue", id: "Antrean — 1 cue" },
+  "c.queueN": { en: "Queue — {a} cues", id: "Antrean — {a} cue" },
+  "c.draft": {
+    en: "What would you have typed? e.g. Summarise yesterday's commits into three bullets.",
+    id: "Apa yang biasanya Anda ketik? Misalnya: Ringkas commit kemarin jadi tiga poin.",
+  },
+  "c.add": { en: "Add", id: "Tambah" },
+  "c.export": { en: "Save queue to a file", id: "Simpan antrean ke berkas" },
+  "c.import": { en: "Restore from a file", id: "Pulihkan dari berkas" },
+  "c.fileNote": {
+    en: "Survives a browser reset. The key is never in the file.",
+    id: "Selamat dari reset peramban. Kunci tidak pernah ada di dalam berkas.",
+  },
+  "c.exported": {
+    en: "Saved {a} cues to a file. Your key is not in it.",
+    id: "Menyimpan {a} cue ke berkas. Kunci Anda tidak ada di dalamnya.",
+  },
+  "c.imported": { en: "Restored {a} cues.", id: "Memulihkan {a} cue." },
+  "c.importBad": {
+    en: "Could not read that file — {a}.",
+    id: "Berkas itu tidak terbaca — {a}.",
+  },
+  "c.importNoList": { en: "no cue list in that file", id: "tidak ada daftar cue di berkas itu" },
+  "c.importEmpty": { en: "that file had no cues in it", id: "berkas itu tidak berisi cue" },
+  "c.unknownProblem": { en: "unknown problem", id: "masalah tak dikenal" },
+
+  "c.emptyTitle": {
+    en: "Nothing queued yet. Add the prompt you send most mornings and it will never need typing again.",
+    id: "Belum ada antrean. Tambahkan prompt yang paling sering Anda kirim tiap pagi, dan ia tak perlu diketik lagi.",
+  },
+
+  "c.up": { en: "Move up", id: "Naikkan" },
+  "c.down": { en: "Move down", id: "Turunkan" },
+  "c.edit": { en: "Edit", id: "Ubah" },
+  "c.save": { en: "Save", id: "Simpan" },
+  "c.discard": { en: "Discard", id: "Buang" },
+  "c.remove": { en: "Remove", id: "Hapus" },
+  "c.copy": { en: "Copy reply", id: "Salin jawaban" },
+  "c.copied": { en: "Copied", id: "Tersalin" },
+  "c.copyCue": { en: "Copy cue", id: "Salin cue" },
+  "c.usage": { en: "{a} in · {b} out · ${c}", id: "{a} masuk · {b} keluar · ${c}" },
+
+  "c.dueNotice": {
+    en: "Time is up. Your cues are below, ready to copy.",
+    id: "Waktunya habis. Cue Anda ada di bawah, siap disalin.",
+  },
+  "c.dueBody": { en: "{a} cues are due.", id: "{a} cue sudah waktunya." },
+  "c.finishedBody": {
+    en: "Your queue has finished running.",
+    id: "Antrean Anda selesai dijalankan.",
+  },
+  "c.callFailed": { en: "The call failed.", id: "Panggilan gagal." },
+  "c.unknownFailure": { en: "Unknown failure.", id: "Kegagalan tak dikenal." },
 } as const;
 
 export type Key = keyof typeof dict;
@@ -200,5 +300,15 @@ export function useLang() {
 
 export function useT() {
   const { lang } = useLang();
-  return useCallback((k: Key) => dict[k][lang], [lang]);
+  return useCallback(
+    (k: Key, vars?: Record<string, string | number>) => {
+      const s: string = dict[k][lang];
+      if (!vars) return s;
+      return Object.entries(vars).reduce(
+        (out, [name, value]) => out.split("{" + name + "}").join(String(value)),
+        s,
+      );
+    },
+    [lang],
+  );
 }
