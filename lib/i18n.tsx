@@ -164,6 +164,17 @@ const dict = {
 
   /* ---- console ------------------------------------------------- */
 
+  "c.schedIn": { en: "In", id: "Dalam" },
+  "c.schedAt": { en: "At", id: "Pukul" },
+  "c.atLabel": { en: "time of day", id: "waktu" },
+  "c.atToday": { en: "Today at {a}", id: "Hari ini pukul {a}" },
+  "c.atTomorrow": { en: "Tomorrow at {a}", id: "Besok pukul {a}" },
+  "c.atNote": {
+    en: "Rolls to tomorrow once today's time has passed. The tab has to be open when it lands.",
+    id: "Berpindah ke besok begitu waktu hari ini lewat. Tab harus terbuka saat waktunya tiba.",
+  },
+
+
   "c.armed": { en: "Armed", id: "Siap" },
   "c.running": { en: "Running cue {a} of {b}", id: "Menjalankan cue {a} dari {b}" },
 
