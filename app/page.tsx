@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
 import { LiveClock } from "@/components/live-clock";
 import { LangToggle } from "@/components/lang-toggle";
+import { Reveal } from "@/components/reveal";
 import { useT } from "@/lib/i18n";
 
 export default function Landing() {
@@ -23,33 +24,30 @@ export default function Landing() {
 
 function Nav() {
   const t = useT();
+  const links: [string, string][] = [
+    ["#how", t("nav.how")],
+    ["#key", t("nav.key")],
+    ["#cost", t("nav.cost")],
+  ];
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Wordmark size={26} />
         <nav className="flex items-center gap-5 text-sm sm:gap-7">
-          <a
-            href="#how"
-            className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
-          >
-            {t("nav.how")}
-          </a>
-          <a
-            href="#key"
-            className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
-          >
-            {t("nav.key")}
-          </a>
-          <a
-            href="#cost"
-            className="hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
-          >
-            {t("nav.cost")}
-          </a>
+          {links.map(([href, label]) => (
+            <a
+              key={href}
+              href={href}
+              className="ul-grow hidden text-muted transition-colors duration-150 hover:text-fg sm:block"
+            >
+              {label}
+            </a>
+          ))}
           <LangToggle />
           <Link
             href="/console"
-            className="rounded-[var(--r-control)] bg-fg px-4 py-2 font-medium text-bg transition-opacity duration-150 hover:opacity-85"
+            className="press rounded-[var(--r-control)] bg-fg px-4 py-2 font-medium text-bg hover:opacity-85"
           >
             {t("nav.console")}
           </Link>
@@ -88,13 +86,13 @@ function Hero() {
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link
               href="/console"
-              className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
+              className="press rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] hover:-translate-y-px"
             >
               {t("hero.cta")}
             </Link>
             <a
               href="#key"
-              className="rounded-[var(--r-control)] border border-line-strong px-6 py-3 font-medium text-fg transition-colors duration-150 hover:bg-panel"
+              className="press rounded-[var(--r-control)] border border-line-strong px-6 py-3 font-medium text-fg hover:bg-panel"
             >
               {t("hero.cta2")}
             </a>
@@ -112,13 +110,13 @@ function Hero() {
 function TimerCard() {
   const t = useT();
   return (
-    <div className="rise rounded-[var(--r-hero)] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
+    <div className="hero-card rise rounded-[var(--r-hero)] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
       <div className="flex items-center justify-between border-b border-line pb-4">
         <span className="text-xs tracking-wide text-faint uppercase">
           {t("card.next")}
         </span>
         <span className="flex items-center gap-2 text-xs text-accent">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <span className="armed h-1.5 w-1.5 rounded-full bg-accent" />
           {t("card.armed")}
         </span>
       </div>
@@ -134,9 +132,9 @@ function TimerCard() {
         {(["card.cue1", "card.cue2", "card.cue3"] as const).map((k, i) => (
           <div
             key={k}
-            className="flex items-start gap-3 rounded-[var(--r-control)] border border-line bg-bg-raised px-4 py-3"
+            className="cue-row flex items-start gap-3 rounded-[var(--r-control)] border border-line bg-bg-raised px-4 py-3"
           >
-            <span className="tnum mt-0.5 font-mono text-xs text-faint">
+            <span className="cue-idx tnum mt-0.5 font-mono text-xs text-faint">
               0{i + 1}
             </span>
             <span className="text-sm leading-snug text-muted">{t(k)}</span>
@@ -156,18 +154,23 @@ function Problem() {
     <section className="border-y border-line bg-bg-raised/40">
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-          <h2
-            className="text-3xl leading-tight font-semibold text-balance sm:text-4xl"
-            style={{ letterSpacing: "-0.03em" }}
+          <Reveal>
+            <h2
+              className="text-3xl leading-tight font-semibold text-balance sm:text-4xl"
+              style={{ letterSpacing: "-0.03em" }}
+            >
+              {line1}
+              <br />
+              {line2}
+            </h2>
+          </Reveal>
+          <Reveal
+            delay={90}
+            className="space-y-5 text-lg leading-relaxed text-muted"
           >
-            {line1}
-            <br />
-            {line2}
-          </h2>
-          <div className="space-y-5 text-lg leading-relaxed text-muted">
             <p>{t("problem.p1")}</p>
             <p>{t("problem.p2")}</p>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -184,44 +187,50 @@ function Steps() {
 
   return (
     <section id="how" className="mx-auto max-w-6xl px-6 py-24">
-      <h2
-        className="text-3xl font-semibold sm:text-4xl"
-        style={{ letterSpacing: "-0.03em" }}
-      >
-        {t("steps.h")}
-      </h2>
-      <p className="mt-4 max-w-2xl text-lg text-muted">{t("steps.sub")}</p>
+      <Reveal>
+        <h2
+          className="text-3xl font-semibold sm:text-4xl"
+          style={{ letterSpacing: "-0.03em" }}
+        >
+          {t("steps.h")}
+        </h2>
+        <p className="mt-4 max-w-2xl text-lg text-muted">{t("steps.sub")}</p>
+      </Reveal>
 
       {/* A rail, not a three-up card grid: the product is a queue on a
           timeline, so the layout is the same shape as the thing it sells.
           Each step indents further and narrows, so the eye falls down the
-          line instead of scanning across equal boxes. */}
+          line instead of scanning across equal boxes. The stagger walks
+          down the rail in the order the cues actually run. */}
       <ol className="relative mt-16 ml-3 border-l border-line pl-9 sm:ml-6 sm:pl-12">
         {steps.map((s, i) => (
-          <li
+          <Reveal
+            as="li"
             key={s.n}
-            className="relative pb-14 last:pb-0"
-            style={{ marginLeft: `${i * 1.75}rem` }}
+            delay={i * 110}
+            className="step-item relative pb-14 last:pb-0"
           >
             <span
-              className="absolute top-1.5 h-2.5 w-2.5 rounded-full bg-accent"
+              className="step-dot absolute top-1.5 h-2.5 w-2.5 rounded-full bg-accent"
               style={{ left: "calc(-2.25rem - 5px)" }}
               aria-hidden="true"
             />
-            <span className="tnum font-mono text-sm text-accent">{s.n}</span>
-            <h3
-              className="mt-2 text-2xl font-medium"
-              style={{ letterSpacing: "-0.025em" }}
-            >
-              {s.t}
-            </h3>
-            <p
-              className="mt-3 leading-relaxed text-muted"
-              style={{ maxWidth: `${34 - i * 3}rem` }}
-            >
-              {s.d}
-            </p>
-          </li>
+            <div style={{ marginLeft: `${i * 1.75}rem` }}>
+              <span className="tnum font-mono text-sm text-accent">{s.n}</span>
+              <h3
+                className="mt-2 text-2xl font-medium"
+                style={{ letterSpacing: "-0.025em" }}
+              >
+                {s.t}
+              </h3>
+              <p
+                className="mt-3 leading-relaxed text-muted"
+                style={{ maxWidth: `${34 - i * 3}rem` }}
+              >
+                {s.d}
+              </p>
+            </div>
+          </Reveal>
         ))}
       </ol>
     </section>
@@ -241,7 +250,7 @@ function KeyStory() {
     <section id="key" className="border-y border-line bg-bg-raised/40">
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="grid gap-14 lg:grid-cols-2">
-          <div>
+          <Reveal>
             <h2
               className="text-3xl font-semibold sm:text-4xl"
               style={{ letterSpacing: "-0.03em" }}
@@ -254,9 +263,12 @@ function KeyStory() {
             <p className="mt-4 text-lg leading-relaxed text-muted">
               {t("key.p2")}
             </p>
-          </div>
+          </Reveal>
 
-          <div className="rounded-[var(--r-panel)] border border-line bg-panel p-7">
+          <Reveal
+            delay={90}
+            className="rounded-[var(--r-panel)] border border-line bg-panel p-7"
+          >
             <div className="space-y-4 font-mono text-sm">
               {rows.map(([where, what, live]) => (
                 <div
@@ -277,7 +289,7 @@ function KeyStory() {
             <p className="mt-6 text-xs leading-relaxed text-faint">
               {t("key.note")}
             </p>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -295,13 +307,15 @@ function Cost() {
   return (
     <section id="cost" className="overflow-hidden py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <h2
-          className="text-3xl font-semibold sm:text-4xl"
-          style={{ letterSpacing: "-0.03em" }}
-        >
-          {t("cost.h")}
-        </h2>
-        <p className="mt-4 max-w-2xl text-lg text-muted">{t("cost.sub")}</p>
+        <Reveal>
+          <h2
+            className="text-3xl font-semibold sm:text-4xl"
+            style={{ letterSpacing: "-0.03em" }}
+          >
+            {t("cost.h")}
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg text-muted">{t("cost.sub")}</p>
+        </Reveal>
       </div>
 
       {/* The one full-width band on the page. Numbers are the argument here,
@@ -317,14 +331,19 @@ function Cost() {
               </tr>
             </thead>
             <tbody>
-              {rows.map(([a, b, c]) => (
-                <tr key={a} className="border-t border-line">
+              {rows.map(([a, b, c], i) => (
+                <Reveal
+                  as="tr"
+                  key={a}
+                  delay={i * 90}
+                  className="row-hover border-t border-line"
+                >
                   <td className="py-6 text-lg">{a}</td>
                   <td className="tnum py-6 font-mono text-sm text-muted">{b}</td>
                   <td className="tnum py-6 text-right font-mono text-2xl text-accent">
                     {c}
                   </td>
-                </tr>
+                </Reveal>
               ))}
             </tbody>
           </table>
@@ -345,38 +364,41 @@ function Limits() {
   return (
     <section className="border-t border-line bg-bg-raised/40">
       <div className="mx-auto max-w-6xl px-6 py-24">
-        <h2
-          className="text-3xl font-semibold sm:text-4xl"
-          style={{ letterSpacing: "-0.03em" }}
-        >
-          {t("limits.h")}
-        </h2>
-        <p className="mt-4 max-w-2xl text-lg text-muted">{t("limits.sub")}</p>
+        <Reveal>
+          <h2
+            className="text-3xl font-semibold sm:text-4xl"
+            style={{ letterSpacing: "-0.03em" }}
+          >
+            {t("limits.h")}
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg text-muted">{t("limits.sub")}</p>
+        </Reveal>
 
         {/* Deliberately not cards. These are admissions, and putting each one
             in its own tidy box makes them read as features. A plain divided
             list reads as a list of facts, which is what they are. */}
         <dl className="mt-12 max-w-3xl">
-          {items.map(([title, body]) => (
-            <div
+          {items.map(([title, body], i) => (
+            <Reveal
               key={title}
+              delay={i * 100}
               className="grid gap-2 border-t border-line py-7 last:border-b sm:grid-cols-[1fr_1.4fr] sm:gap-10"
             >
               <dt className="font-medium">{title}</dt>
               <dd className="m-0 leading-relaxed text-muted">{body}</dd>
-            </div>
+            </Reveal>
           ))}
         </dl>
 
-        <div className="mt-14 flex flex-wrap items-center gap-4">
+        <Reveal delay={120} className="mt-14 flex flex-wrap items-center gap-4">
           <Link
             href="/console"
-            className="rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] transition-transform duration-150 hover:-translate-y-px"
+            className="press rounded-[var(--r-control)] bg-accent px-6 py-3 font-medium text-[#1a1206] hover:-translate-y-px"
           >
             {t("limits.cta")}
           </Link>
           <span className="text-sm text-faint">{t("limits.note")}</span>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -393,7 +415,7 @@ function Footer() {
         </div>
         <a
           href="https://github.com/bryankwandou/cueline"
-          className="text-sm text-faint transition-colors duration-150 hover:text-fg"
+          className="ul-grow text-sm text-faint transition-colors duration-150 hover:text-fg"
         >
           {t("footer.src")}
         </a>

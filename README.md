@@ -49,7 +49,7 @@ environment — it only ever uses the one you paste in the browser.
 
 ## Stack
 
-Next.js 15 (App Router), React 19, Tailwind CSS v4, `@anthropic-ai/sdk`.
+Next.js 16 (App Router), React 19, Tailwind CSS v4, `@anthropic-ai/sdk`.
 No database, no auth provider, no analytics.
 
 ## Design

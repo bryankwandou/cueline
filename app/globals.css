@@ -196,3 +196,240 @@ kbd {
   margin-left: 50%;
   transform: translateX(-50%);
 }
+
+/* --- Focus: visible, and only for keyboards ---------------------
+   Was missing entirely. Amber is the signal colour, so it is what a
+   keyboard user follows around the page — same meaning as everywhere
+   else, no new vocabulary to learn. */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* --- Scroll reveal ---------------------------------------------
+   Only the hero animated before; everything below the fold simply
+   existed. This carries the same 480ms entrance down the page so
+   arriving at a section feels like the section arriving at you.
+   Distance is small (14px) on purpose — content should settle, not
+   fly in. */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 480ms var(--ease),
+    transform 480ms var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.reveal[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* --- Interaction states ----------------------------------------
+   Under 200ms for state changes, per the motion rules. Press is
+   faster than hover because a click should feel mechanical. */
+
+.press {
+  transition:
+    transform 140ms var(--ease),
+    opacity 140ms var(--ease),
+    background-color 140ms var(--ease),
+    border-color 140ms var(--ease);
+}
+
+.press:active {
+  transform: translateY(1px) scale(0.994);
+  transition-duration: 70ms;
+}
+
+/* Row hover on the cost table: a warm wash, not a border change, so
+   the table's horizontal rhythm stays intact while reading across. */
+.row-hover {
+  transition: background-color 160ms var(--ease);
+}
+
+.row-hover:hover {
+  background: var(--panel);
+}
+
+/* --- Underline that grows from the left -------------------------
+   Nav links had a colour change only. The rule gives the pointer
+   something to track without moving any text. */
+
+.ul-grow {
+  position: relative;
+}
+
+.ul-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  height: 1px;
+  width: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms var(--ease);
+}
+
+.ul-grow:hover::after,
+.ul-grow:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* --- Cue rows in the hero card ----------------------------------
+   The three sample cues sat inert. A slight lift plus an amber index
+   on hover hints that the real console list is editable. */
+
+.cue-row {
+  transition:
+    background-color 160ms var(--ease),
+    border-color 160ms var(--ease),
+    transform 160ms var(--ease);
+}
+
+.cue-row:hover {
+  background: var(--panel-hover);
+  border-color: var(--border-strong);
+  transform: translateX(2px);
+}
+
+.cue-row:hover .cue-idx {
+  color: var(--accent);
+}
+
+.cue-idx {
+  transition: color 160ms var(--ease);
+}
+
+/* --- Step rail --------------------------------------------------
+   The dot is the cue firing. It gains a ring when its step is hovered,
+   reusing the armed-timer vocabulary rather than inventing a new one. */
+
+.step-dot {
+  transition:
+    box-shadow 180ms var(--ease),
+    transform 180ms var(--ease);
+}
+
+.step-item:hover .step-dot {
+  box-shadow: 0 0 0 5px var(--accent-dim);
+  transform: scale(1.15);
+}
+
+/* --- Hero card lift ---------------------------------------------
+   The one object on the page you are meant to look at, so it is the
+   one that responds to the pointer at all. */
+
+.hero-card {
+  transition:
+    transform 320ms var(--ease),
+    box-shadow 320ms var(--ease);
+}
+
+.hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 32px 72px -32px rgba(0, 0, 0, 0.95);
+}
+
+/* --- Console: live state ----------------------------------------
+   The second looping animation in the product, and it earns its place
+   for the same reason the armed timer does: a cue that is mid-flight
+   has to look different from one that is merely next in line. */
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.82);
+  }
+}
+
+.dot-running {
+  animation: breathe 1.4s var(--ease) infinite;
+}
+
+/* --- A cue arriving ---------------------------------------------
+   Shorter than a page entrance. Adding a row is a small act and the
+   list should keep up with fast typing rather than stage a show. */
+
+@keyframes slot-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.slot-in {
+  animation: slot-in 260ms var(--ease) both;
+}
+
+/* --- A reply arriving -------------------------------------------
+   Replies land one at a time as the queue works down. Fading the block
+   in while it settles keeps the eye on the row that just resolved. */
+
+@keyframes unfold {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.unfold {
+  animation: unfold 320ms var(--ease) both;
+}
+
+/* --- The notice banner ------------------------------------------
+   It reports the outcome of something the user just did, so it should
+   register as new rather than appear to have always been there. */
+
+.notice-in {
+  animation: slot-in 300ms var(--ease) both;
+}
+
+/* --- Queue progress bar -----------------------------------------
+   Width is set inline from finished-over-total. Amber, because it is
+   the same signal as the armed timer at a different stage. */
+
+.progress-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: var(--r-pill);
+  transition: width 420ms var(--ease);
+}

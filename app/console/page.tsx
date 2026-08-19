@@ -172,6 +172,13 @@ export default function Console() {
     };
   }, [armed, remaining, h, m, s]);
 
+  // How much of the queue has resolved, either way. Drives the progress bar
+  // and the header count; a failed cue still counts as dealt with.
+  const finished = useMemo(
+    () => cues.filter((c) => c.status === "done" || c.status === "failed").length,
+    [cues],
+  );
+
   const canArm =
     cues.length > 0 &&
     h * 3600 + m * 60 + s > 0 &&
@@ -293,11 +300,15 @@ export default function Console() {
           <div className="flex items-center gap-4 text-sm">
             {armed && (
               <span className="flex items-center gap-2 text-accent">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                <span className="armed h-1.5 w-1.5 rounded-full bg-accent" />
                 Armed
               </span>
             )}
-            {firing && <span className="text-muted">Running the queue…</span>}
+            {firing && (
+              <span className="text-muted">
+                Running cue {finished + 1} of {cues.length}
+              </span>
+            )}
             <LangToggle />
           </div>
         </div>
@@ -328,7 +339,7 @@ export default function Console() {
             {armed ? (
               <button
                 onClick={disarm}
-                className="mt-4 w-full rounded-[var(--r-control)] border border-line-strong py-3 font-medium transition-colors duration-150 hover:bg-panel-hover"
+                className="press mt-4 w-full rounded-[var(--r-control)] border border-line-strong py-3 font-medium hover:bg-panel-hover"
               >
                 Cancel
               </button>
@@ -336,7 +347,7 @@ export default function Console() {
               <button
                 onClick={arm}
                 disabled={!canArm}
-                className="mt-4 w-full rounded-[var(--r-control)] bg-accent py-3 font-medium text-[#1a1206] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+                className="press mt-4 w-full rounded-[var(--r-control)] bg-accent py-3 font-medium text-[#1a1206] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 disabled:active:transform-none"
               >
                 Arm the queue
               </button>
@@ -365,7 +376,7 @@ export default function Console() {
                   key={value}
                   onClick={() => setMode(value)}
                   disabled={armed}
-                  className={`rounded-[var(--r-control)] border py-2.5 text-sm transition-colors duration-150 disabled:opacity-40 ${
+                  className={`press rounded-[var(--r-control)] border py-2.5 text-sm disabled:opacity-40 ${
                     mode === value
                       ? "border-accent-line bg-accent-dim text-fg"
                       : "border-line text-muted hover:bg-panel-hover"
@@ -433,12 +444,31 @@ export default function Console() {
         {/* ---------------- queue ---------------- */}
         <div className="space-y-6">
           {notice && (
-            <div className="rounded-[var(--r-panel)] border border-accent-line bg-accent-dim px-5 py-4 text-sm">
+            <div
+              role="status"
+              aria-live="polite"
+              className="notice-in rounded-[var(--r-panel)] border border-accent-line bg-accent-dim px-5 py-4 text-sm"
+            >
               {notice}
             </div>
           )}
 
           <Panel title={`Queue — ${cues.length} cue${cues.length === 1 ? "" : "s"}`}>
+            {firing && cues.length > 0 && (
+              <div
+                className="progress-track mb-5"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={cues.length}
+                aria-valuenow={finished}
+                aria-label="Queue progress"
+              >
+                <div
+                  className="progress-fill"
+                  style={{ width: `${(finished / cues.length) * 100}%` }}
+                />
+              </div>
+            )}
             <div className="flex flex-col gap-3 sm:flex-row">
               <textarea
                 value={draft}
@@ -453,7 +483,7 @@ export default function Console() {
               <button
                 onClick={addCue}
                 disabled={!draft.trim()}
-                className="rounded-[var(--r-control)] border border-line-strong px-5 py-3 text-sm font-medium transition-colors duration-150 hover:bg-panel-hover disabled:opacity-30 sm:self-start"
+                className="press rounded-[var(--r-control)] border border-line-strong px-5 py-3 text-sm font-medium hover:bg-panel-hover disabled:opacity-30 disabled:active:transform-none sm:self-start"
               >
                 Add
               </button>
@@ -580,11 +610,11 @@ function CueRow({
       : cue.status === "failed"
         ? "bg-bad"
         : cue.status === "running"
-          ? "bg-accent"
+          ? "bg-accent dot-running"
           : "bg-faint";
 
   return (
-    <li className="rounded-[var(--r-control)] border border-line bg-bg-raised">
+    <li className="slot-in rounded-[var(--r-control)] border border-line bg-bg-raised">
       <div className="flex items-start gap-3.5 px-4 py-3.5">
         <span className="tnum mt-0.5 font-mono text-xs text-faint">
           {String(index + 1).padStart(2, "0")}
@@ -603,7 +633,7 @@ function CueRow({
       </div>
 
       {cue.reply && (
-        <div className="border-t border-line px-4 py-3.5">
+        <div className="unfold border-t border-line px-4 py-3.5">
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted">
             {cue.reply}
           </p>
@@ -615,7 +645,7 @@ function CueRow({
       )}
 
       {cue.error && (
-        <div className="border-t border-line px-4 py-3.5">
+        <div className="unfold border-t border-line px-4 py-3.5">
           <p className="text-sm leading-relaxed text-bad">{cue.error}</p>
         </div>
       )}

@@ -41,6 +41,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${mono.variable}`}>
+      <head>
+        {/* Scroll reveals start at opacity 0 and are switched on by an
+            observer. With scripting off that observer never runs, so the
+            page below the fold would be blank — this hands the content
+            back rather than hiding it. */}
+        <noscript>
+          <style>
+            {".reveal { opacity: 1 !important; transform: none !important; }"}
+          </style>
+        </noscript>
+      </head>
       <body className="grain min-h-dvh antialiased">
         <LangProvider>{children}</LangProvider>
       </body>
