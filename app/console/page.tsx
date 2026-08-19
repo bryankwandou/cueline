@@ -22,6 +22,12 @@ export default function Console() {
   const [cues, setCues] = useState<Cue[]>([]);
   const [draft, setDraft] = useState("");
 
+  // Two ways to say when. A duration answers "give me twenty minutes"; a
+  // time of day answers "every morning at seven", which is the case this
+  // product is named after.
+  const [sched, setSched] = useState<"in" | "at">("in");
+  const [at, setAt] = useState("07:00");
+
   const [h, setH] = useState(0);
   const [m, setM] = useState(30);
   const [s, setS] = useState(0);
@@ -40,6 +46,8 @@ export default function Console() {
     setApiKey(load("key", ""));
     setMode(load<RunMode>("mode", "execute"));
     setCues(load<Cue[]>("cues", []));
+    setSched(load<"in" | "at">("sched", "in"));
+    setAt(load("at", "07:00"));
     hydrated.current = true;
   }, []);
 
@@ -52,6 +60,12 @@ export default function Console() {
   useEffect(() => {
     if (hydrated.current) save("cues", cues);
   }, [cues]);
+  useEffect(() => {
+    if (hydrated.current) save("sched", sched);
+  }, [sched]);
+  useEffect(() => {
+    if (hydrated.current) save("at", at);
+  }, [at]);
 
   /* ---- the clock ------------------------------------------------ */
   const fire = useCallback(async () => {
@@ -173,14 +187,33 @@ export default function Console() {
     [cues],
   );
 
+  /**
+   * Seconds until the clock next reads {at}.
+   *
+   * Built from a Date rather than by adding a fixed count of seconds, so a
+   * daylight-saving shift between now and then does not drag the target
+   * along with it — the cue lands at seven in the morning as the reader's
+   * own clock shows it.
+   */
+  const secondsUntilAt = useCallback(() => {
+    const [hh, mm] = at.split(":").map(Number);
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return 0;
+    const target = new Date();
+    target.setHours(hh, mm, 0, 0);
+    if (target.getTime() <= Date.now()) target.setDate(target.getDate() + 1);
+    return Math.round((target.getTime() - Date.now()) / 1000);
+  }, [at]);
+
+  const armSeconds = sched === "at" ? secondsUntilAt() : h * 3600 + m * 60 + s;
+
   const clock = useMemo(() => {
-    const src = armed || remaining > 0 ? remaining : h * 3600 + m * 60 + s;
+    const src = armed || remaining > 0 ? remaining : armSeconds;
     return {
       h: String(Math.floor(src / 3600)).padStart(2, "0"),
       m: String(Math.floor((src % 3600) / 60)).padStart(2, "0"),
       s: String(src % 60).padStart(2, "0"),
     };
-  }, [armed, remaining, h, m, s]);
+  }, [armed, remaining, armSeconds]);
 
   // How much of the queue has resolved, either way. Drives the progress bar
   // and the header count; a failed cue still counts as dealt with.
@@ -196,17 +229,43 @@ export default function Console() {
    * against the morning you actually had in mind.
    */
   const landsAt = useMemo(() => {
-    const total = armed ? remaining : h * 3600 + m * 60 + s;
+    const total = armed ? remaining : armSeconds;
     if (total <= 0) return null;
     return new Date(Date.now() + total * 1000).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
-  }, [armed, remaining, h, m, s]);
+  }, [armed, remaining, armSeconds]);
+
+  // Whether the chosen time still falls today. Repainted on an interval as
+  // well as on edit: leave the tab open across the chosen minute and this
+  // label has to flip from today to tomorrow on its own.
+  const [atPreview, setAtPreview] = useState<string | null>(null);
+  useEffect(() => {
+    if (sched !== "at") {
+      setAtPreview(null);
+      return;
+    }
+    const paint = () => {
+      const [hh, mm] = at.split(":").map(Number);
+      if (Number.isNaN(hh) || Number.isNaN(mm)) {
+        setAtPreview(null);
+        return;
+      }
+      const target = new Date();
+      target.setHours(hh, mm, 0, 0);
+      const rolls = target.getTime() <= Date.now();
+      const shown = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+      setAtPreview(t(rolls ? "c.atTomorrow" : "c.atToday", { a: shown }));
+    };
+    paint();
+    const id = setInterval(paint, 30_000);
+    return () => clearInterval(id);
+  }, [sched, at, t]);
 
   const canArm =
     cues.length > 0 &&
-    h * 3600 + m * 60 + s > 0 &&
+    armSeconds > 0 &&
     (mode === "reminder" || apiKey.trim().length > 0);
 
   /* ---- actions -------------------------------------------------- */
@@ -310,7 +369,7 @@ export default function Console() {
         error: undefined,
       })),
     );
-    const total = h * 3600 + m * 60 + s;
+    const total = armSeconds;
     setNotice(null);
     setRemaining(total);
     setFireAt(Date.now() + total * 1000);
@@ -364,6 +423,28 @@ export default function Console() {
         {/* ---------------- left rail ---------------- */}
         <div className="space-y-6">
           <Panel title={t("c.timer")}>
+            <div className="mb-4 grid grid-cols-2 gap-2">
+              {(
+                [
+                  ["in", t("c.schedIn")],
+                  ["at", t("c.schedAt")],
+                ] as ["in" | "at", string][]
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setSched(value)}
+                  disabled={armed}
+                  className={`press rounded-[var(--r-control)] border py-2 text-sm disabled:opacity-40 ${
+                    sched === value
+                      ? "border-accent-line bg-accent-dim text-fg"
+                      : "border-line text-muted hover:bg-panel-hover"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             <div
               className={`tnum flex items-baseline justify-center gap-1.5 rounded-[var(--r-control)] border border-line bg-bg-raised py-8 font-mono text-5xl font-medium ${
                 armed ? "armed" : ""
@@ -382,29 +463,54 @@ export default function Console() {
               </p>
             )}
 
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <NumField
-                label={t("c.hours")}
-                value={h}
-                onChange={setH}
-                max={23}
-                disabled={armed}
-              />
-              <NumField
-                label={t("c.minutes")}
-                value={m}
-                onChange={setM}
-                max={59}
-                disabled={armed}
-              />
-              <NumField
-                label={t("c.seconds")}
-                value={s}
-                onChange={setS}
-                max={59}
-                disabled={armed}
-              />
-            </div>
+            {sched === "at" ? (
+              <div className="mt-4">
+                <label className="block">
+                  <span className="mb-1.5 block text-[11px] text-faint">
+                    {t("c.atLabel")}
+                  </span>
+                  <input
+                    type="time"
+                    value={at}
+                    disabled={armed}
+                    onChange={(e) => setAt(e.target.value)}
+                    className="tnum w-full rounded-[var(--r-control)] border border-line bg-bg-raised px-3 py-2.5 text-center font-mono text-lg outline-none transition-colors duration-150 focus:border-accent-line disabled:opacity-40"
+                  />
+                </label>
+                {atPreview && (
+                  <p className="mt-2 text-center text-xs text-muted">
+                    {atPreview}
+                  </p>
+                )}
+                <p className="mt-3 text-xs leading-relaxed text-faint">
+                  {t("c.atNote")}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <NumField
+                  label={t("c.hours")}
+                  value={h}
+                  onChange={setH}
+                  max={23}
+                  disabled={armed}
+                />
+                <NumField
+                  label={t("c.minutes")}
+                  value={m}
+                  onChange={setM}
+                  max={59}
+                  disabled={armed}
+                />
+                <NumField
+                  label={t("c.seconds")}
+                  value={s}
+                  onChange={setS}
+                  max={59}
+                  disabled={armed}
+                />
+              </div>
+            )}
 
             {armed ? (
               <button
