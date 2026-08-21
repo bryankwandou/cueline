@@ -3,8 +3,9 @@
 # Vercel's free tier will only run a cron once a day, which is no use to a
 # queue set for 07:00. GitHub runs this every five minutes at no cost, so the
 # worst a cue is ever late is that gap — the price of not asking anyone for a
-# card. GitHub deprioritises scheduled runs under load, so the hourly Vercel
-# cron in vercel.json stays on as a floor beneath this.
+# card. GitHub deprioritises scheduled runs under load, so a once-daily Vercel
+# cron in vercel.json stays on as a floor beneath this — the most the free
+# tier there allows.
 name: tick
 
 on:
