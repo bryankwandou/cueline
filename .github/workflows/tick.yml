@@ -1,0 +1,23 @@
+# Something has to knock on the door while the laptop is shut.
+#
+# Vercel's free tier will only run a cron once a day, which is no use to a
+# queue set for 07:00. GitHub runs this every five minutes at no cost, so the
+# worst a cue is ever late is that gap — the price of not asking anyone for a
+# card. GitHub deprioritises scheduled runs under load, so the hourly Vercel
+# cron in vercel.json stays on as a floor beneath this.
+name: tick
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fire any queue that has come due
+        run: |
+          curl -sS --fail-with-body \
+            -H "authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://cueline-delta.vercel.app/api/tick
