@@ -38,6 +38,10 @@ export default function Console() {
   const [fireAt, setFireAt] = useState<number | null>(null);
   const [firing, setFiring] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  // A handed-over run lives on the server, not here. All this holds is the
+  // receipt: enough to reopen the run later, and nothing that could fire it.
+  const [handoff, setHandoff] = useState<string | null>(null);
+  const [handing, setHanding] = useState(false);
 
   const hydrated = useRef(false);
 
@@ -382,6 +386,41 @@ export default function Console() {
     }
   }
 
+  /**
+   * Moves the queue off this machine.
+   *
+   * Everything else in this console depends on the tab staying open, which is
+   * exactly wrong for a cue meant to land at seven in the morning. This posts
+   * the queue and a sealed key to the server and steps back.
+   */
+  async function handOver() {
+    if (!canArm || mode !== "execute") return;
+    setHanding(true);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          cues: cues.map((c) => c.body),
+          fireAt: new Date(Date.now() + armSeconds * 1000).toISOString(),
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        setNotice(body.error ?? t("c.unknownProblem"));
+        return;
+      }
+      setHandoff(body.handle);
+      setNotice(t("c.cloudSent"));
+    } catch {
+      setNotice(t("c.unknownProblem"));
+    } finally {
+      setHanding(false);
+    }
+  }
+
   function disarm() {
     setArmed(false);
     setFireAt(null);
@@ -566,6 +605,29 @@ export default function Console() {
               {mode === "execute" ? t("c.modeRunNote") : t("c.modeRemindNote")}
             </p>
           </Panel>
+
+          {mode === "execute" && (
+            <Panel title={t("c.cloud")}>
+              <button
+                onClick={() => void handOver()}
+                disabled={!canArm || handing}
+                className="press w-full rounded-[var(--r-control)] border border-accent-line bg-accent-dim py-2.5 text-sm text-fg disabled:opacity-40"
+              >
+                {handing ? t("c.cloudBusy") : t("c.cloudHand")}
+              </button>
+              {handoff && (
+                <a
+                  href={`/run/${handoff}`}
+                  className="unfold mt-3 block rounded-[var(--r-control)] border border-line px-3 py-2 text-center text-sm text-fg hover:bg-panel-hover"
+                >
+                  {t("c.cloudOpen")}
+                </a>
+              )}
+              <p className="mt-3 text-xs leading-relaxed text-faint">
+                {canArm ? t("c.cloudNote") : t("c.cloudNeed")}
+              </p>
+            </Panel>
+          )}
 
           {mode === "execute" && (
             <Panel title={t("c.key")}>
