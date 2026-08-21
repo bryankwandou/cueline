@@ -164,6 +164,18 @@ const dict = {
 
   /* ---- console ------------------------------------------------- */
 
+  "c.cloud": { en: "Run without this tab", id: "Jalan tanpa tab ini" },
+  "c.cloudHand": { en: "Hand this run to the server", id: "Serahkan run ini ke server" },
+  "c.cloudNote": {
+    en: "The queue fires from our server at the chosen time, so it lands whether or not this browser is open. Your key is encrypted and held until the run finishes, then wiped from the row.",
+    id: "Antrean menyala dari server kami pada waktu yang dipilih, jadi ia tetap tiba entah peramban ini terbuka atau tidak. Kunci Anda dienkripsi dan disimpan sampai run selesai, lalu dihapus dari barisnya.",
+  },
+  "c.cloudSent": { en: "Handed over. Keep this link.", id: "Sudah diserahkan. Simpan tautan ini." },
+  "c.cloudOpen": { en: "Watch this run", id: "Pantau run ini" },
+  "c.cloudBusy": { en: "Handing over…", id: "Menyerahkan…" },
+  "c.cloudNeed": { en: "A server run needs a key, a queue, and a future time.", id: "Run server butuh kunci, antrean, dan waktu di depan." },
+
+
   "c.schedIn": { en: "In", id: "Dalam" },
   "c.schedAt": { en: "At", id: "Pukul" },
   "c.atLabel": { en: "time of day", id: "waktu" },
