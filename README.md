@@ -59,3 +59,25 @@ Tokens, palette, motion rules and voice live in [`brand.md`](./brand.md).
 ## Licence
 
 MIT.
+
+## Running with the tab closed
+
+The console's own timer needs this tab open, which is no use for a cue set
+for seven in the morning. "Hand this run to the server" posts the queue and
+your key to `/api/schedule`; the key is sealed with AES-256-GCM under
+`VAULT_SECRET` and the row waits in Postgres.
+
+A GitHub Actions schedule calls `/api/tick` every five minutes, which claims
+any due row, sends its cues to Haiku 4.5, writes the replies back, and blanks
+the stored key in the same statement. Finished rows are deleted after a week.
+Vercel's own cron runs once a day underneath as a floor — the free tier there
+will not do better than daily.
+
+Two things follow from this that are worth saying plainly. A cue can land up
+to five minutes late, because that is how often the door gets knocked on. And
+in this mode the key does leave your browser: it sits encrypted on our side
+until the run finishes. Reminder mode and the in-tab timer still send nothing
+anywhere.
+
+Set `DATABASE_URL`, `VAULT_SECRET`, and `CRON_SECRET` in the project, and
+mirror `CRON_SECRET` as a repository secret so the workflow can authenticate.
