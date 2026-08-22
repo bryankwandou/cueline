@@ -13,7 +13,9 @@ const SYSTEM =
 /**
  * The part that runs when nobody is watching.
  *
- * Vercel Cron calls this every minute. It claims due rows one at a time with
+ * A GitHub Actions shift calls this every 30 seconds; a once-daily Vercel
+ * cron sits underneath as a floor. Measured lateness on the free tier is
+ * about half a minute. It claims due rows one at a time with
  * a conditional UPDATE, so two overlapping invocations cannot both send the
  * same queue — the second one finds nothing left to claim.
  */
