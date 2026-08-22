@@ -162,6 +162,65 @@ const dict = {
   },
   "footer.src": { en: "Source on GitHub", id: "Kode sumber di GitHub" },
 
+
+
+  "dial.cues": { en: "Cues each run", id: "Cue tiap run" },
+  "dial.cue1": { en: "1 cue", id: "1 cue" },
+  "dial.cueN": { en: "{a} cues", id: "{a} cue" },
+  "dial.days": { en: "Days a month", id: "Hari per bulan" },
+  "dial.dayN": { en: "{a} days", id: "{a} hari" },
+  "dial.in": { en: "Tokens in", id: "Token masuk" },
+  "dial.out": { en: "Tokens out", id: "Token keluar" },
+  "dial.perMonth": { en: "Per month", id: "Per bulan" },
+  "dial.note": {
+    en: "Haiku 4.5, billed by Anthropic at ${a} per million in and ${b} out. Cueline takes nothing on top.",
+    id: "Haiku 4.5, ditagih Anthropic ${a} per juta token masuk dan ${b} keluar. Cueline tidak mengambil apa pun di atasnya.",
+  },
+
+  /* ---- the demo in the hero -------------------------------------- */
+
+  "try.eyebrow": { en: "Try it here", id: "Coba di sini" },
+  "try.idle": { en: "Nothing set", id: "Belum diatur" },
+  "try.armed": { en: "Counting", id: "Menghitung" },
+  "try.done": { en: "Landed", id: "Tiba" },
+  "try.cueLabel": { en: "The cue", id: "Cue-nya" },
+  "try.placeholder": {
+    en: "Type what you would have sent…",
+    id: "Ketik apa yang biasanya Anda kirim…",
+  },
+  "try.pick": { en: "or take one of these", id: "atau ambil salah satu ini" },
+  "try.p1": { en: "Morning brief", id: "Ringkasan pagi" },
+  "try.p1body": {
+    en: "Three bullets on what I should look at first today.",
+    id: "Tiga poin tentang apa yang harus saya lihat lebih dulu hari ini.",
+  },
+  "try.p2": { en: "Standup note", id: "Catatan standup" },
+  "try.p2body": {
+    en: "Turn yesterday's commits into a standup update I can read out loud.",
+    id: "Ubah commit kemarin jadi laporan standup yang bisa saya bacakan.",
+  },
+  "try.p3": { en: "Inbox triage", id: "Sortir inbox" },
+  "try.p3body": {
+    en: "Sort these emails into reply now, reply later, and ignore.",
+    id: "Pilah email ini jadi balas sekarang, balas nanti, dan abaikan.",
+  },
+  "try.when": { en: "Fires in", id: "Menyala dalam" },
+  "try.start": { en: "Start the countdown", id: "Mulai hitung mundur" },
+  "try.stop": { en: "Stop", id: "Hentikan" },
+  "try.again": { en: "Run it again", id: "Jalankan lagi" },
+  "try.needCue": { en: "Write a cue first.", id: "Tulis cue-nya dulu." },
+  "try.landedTitle": { en: "This is the moment it lands.", id: "Inilah saat ia tiba." },
+  "try.landedBody": {
+    en: "On the real thing your key is attached here and Haiku answers. Nothing was sent just now — this ran entirely in your browser.",
+    id: "Pada versi sebenarnya kunci Anda ikut di sini dan Haiku menjawab. Barusan tidak ada yang dikirim — semua berjalan di peramban Anda.",
+  },
+  "try.carry": { en: "Take this cue to the console", id: "Bawa cue ini ke konsol" },
+  "try.notify": { en: "Cueline", id: "Cueline" },
+  "try.foot": {
+    en: "A real countdown, running now. No key, no account, nothing leaves this page.",
+    id: "Hitung mundur sungguhan, berjalan sekarang. Tanpa kunci, tanpa akun, tidak ada yang keluar dari halaman ini.",
+  },
+
   /* ---- console ------------------------------------------------- */
 
   "c.cloud": { en: "Run without this tab", id: "Jalan tanpa tab ini" },

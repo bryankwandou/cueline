@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { Mark, Wordmark } from "@/components/logo";
-import { LiveClock } from "@/components/live-clock";
+import { TryIt } from "@/components/try-it";
+import { CostDial } from "@/components/cost-dial";
 import { LangToggle } from "@/components/lang-toggle";
 import { Reveal } from "@/components/reveal";
 import { useT } from "@/lib/i18n";
@@ -101,49 +102,9 @@ function Hero() {
           <p className="mt-6 text-sm text-faint">{t("hero.note")}</p>
         </div>
 
-        <TimerCard />
+        <TryIt />
       </div>
     </section>
-  );
-}
-
-function TimerCard() {
-  const t = useT();
-  return (
-    <div className="hero-card rise rounded-[var(--r-hero)] border border-line bg-panel p-7 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)]">
-      <div className="flex items-center justify-between border-b border-line pb-4">
-        <span className="text-xs tracking-wide text-faint uppercase">
-          {t("card.next")}
-        </span>
-        <span className="flex items-center gap-2 text-xs text-accent">
-          <span className="armed h-1.5 w-1.5 rounded-full bg-accent" />
-          {t("card.armed")}
-        </span>
-      </div>
-
-      <div className="py-9">
-        <LiveClock />
-        <p className="mt-3 text-center text-xs text-faint">
-          {t("card.counting")}
-        </p>
-      </div>
-
-      <div className="space-y-2.5">
-        {(["card.cue1", "card.cue2", "card.cue3"] as const).map((k, i) => (
-          <div
-            key={k}
-            className="cue-row flex items-start gap-3 rounded-[var(--r-control)] border border-line bg-bg-raised px-4 py-3"
-          >
-            <span className="cue-idx tnum mt-0.5 font-mono text-xs text-faint">
-              0{i + 1}
-            </span>
-            <span className="text-sm leading-snug text-muted">{t(k)}</span>
-          </div>
-        ))}
-      </div>
-
-      <p className="mt-5 text-xs text-faint">{t("card.foot")}</p>
-    </div>
   );
 }
 
@@ -318,36 +279,10 @@ function Cost() {
         </Reveal>
       </div>
 
-      {/* The one full-width band on the page. Numbers are the argument here,
-          so they get the whole horizon instead of another bordered box. */}
-      <div className="bleed mt-14 border-y border-line bg-bg-raised/40">
-        <div className="mx-auto max-w-5xl overflow-x-auto px-6">
-          <table className="w-full min-w-[520px] text-left">
-            <thead>
-              <tr className="text-xs tracking-wide text-faint uppercase">
-                <th className="py-5 font-normal">{t("cost.th1")}</th>
-                <th className="py-5 font-normal">{t("cost.th2")}</th>
-                <th className="py-5 text-right font-normal">{t("cost.th3")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(([a, b, c], i) => (
-                <Reveal
-                  as="tr"
-                  key={a}
-                  delay={i * 90}
-                  className="row-hover border-t border-line"
-                >
-                  <td className="py-6 text-lg">{a}</td>
-                  <td className="tnum py-6 font-mono text-sm text-muted">{b}</td>
-                  <td className="tnum py-6 text-right font-mono text-2xl text-accent">
-                    {c}
-                  </td>
-                </Reveal>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* The one full-width band on the page. Numbers are the argument
+          here, so they get the whole horizon instead of another box. */}
+      <div className="bleed mt-12 border-y border-line bg-bg-raised/40">
+        <CostDial />
       </div>
     </section>
   );
