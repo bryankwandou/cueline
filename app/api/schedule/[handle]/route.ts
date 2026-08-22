@@ -6,12 +6,18 @@ export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ handle: string }> };
 
-/** Reads back a run. The sealed key is never part of the answer. */
+/**
+ * Reads back a run. The sealed key is never part of the answer — only
+ * `key_held`, a plain boolean saying whether the row still holds one. That
+ * is enough for anyone to watch the key disappear when the run settles,
+ * and it hands out nothing that could be decrypted.
+ */
 export async function GET(_req: Request, { params }: Ctx) {
   const { handle } = await params;
   await migrate();
   const rows = (await sql()`
-    SELECT handle, fire_at, cues, status, results, settled_at
+    SELECT handle, fire_at, cues, status, results, settled_at,
+           sealed_key <> '' AS key_held
     FROM runs WHERE handle = ${handle}`) as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "No such run." }, { status: 404 });
   return NextResponse.json(rows[0]);
