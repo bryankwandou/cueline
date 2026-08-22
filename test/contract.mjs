@@ -11,12 +11,24 @@ const ok = (n, c, d = "") => {
   console.log(`  ${c ? "PASS" : "FAIL"}  ${n}${d ? ` — ${d}` : ""}`);
 };
 
-const post = (body) =>
-  fetch(BASE + "/api/schedule", {
+const post = async (body) => {
+  const res = await fetch(BASE + "/api/schedule", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
+  // A 429 here is the limiter doing its job, not the contract breaking. It
+  // happens when limit.mjs ran from this address inside the last hour. Saying
+  // so beats fifteen confusing failures.
+  if (res.status === 429) {
+    console.log(
+      "\n  STOPPED  this address is inside its scheduling allowance." +
+        "\n           That is test/limit.mjs working. Wait an hour and run this again.",
+    );
+    process.exit(2);
+  }
+  return res;
+};
 
 const FAKE = "sk-ant-api03-CONTRACT-PROBE-NOT-A-REAL-KEY";
 const good = () => ({
