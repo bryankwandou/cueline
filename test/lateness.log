@@ -1,0 +1,11 @@
+probe 1  due 08:50:07Z  fired +8s
+probe 2  due 09:08:45Z  fired +4s
+probe 3  due 09:27:23Z  fired +3s
+probe 4  due 09:46:00Z  fired +5s
+probe 5  due 10:04:38Z  fired +2s
+probe 6  due 10:23:14Z  fired +4s
+probe 7  due 10:41:50Z  fired +7s
+probe 8  due 11:00:36Z  fired +10s
+probe 9  due 11:19:22Z  fired +17s
+
+9/9 fired.  best +2s  worst +17s  median +5s
