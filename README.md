@@ -80,7 +80,9 @@ reproduce, no key spent, because the probe's key is deliberately invalid.
 
 ## Proofs
 
-All three are runnable by a stranger. The first needs nothing but Node.
+Seven of them, all runnable by a stranger — no credentials, no key, no
+database access. The first needs nothing but Node and no network at all.
+Chrome is needed for the three browser ones; `npm install` brings the rest.
 
 ```bash
 node --experimental-strip-types test/repeat.mjs   # the recurrence arithmetic, incl. the weekend in your zone
@@ -92,6 +94,19 @@ node test/limit.mjs      # the ceiling on /api/schedule — run this LAST, it sp
 node test/lateness.mjs   # how late runs actually land (three hours to complete)
 node test/chain.mjs      # a daily run really does leave a successor behind (~3 minutes)
 ```
+
+Last recorded together on 2026-08-22, against the live deployment:
+
+| Proof | Result |
+|---|---|
+| `repeat.mjs` | 10/10 |
+| `contract.mjs` | 17/17 |
+| `interact.mjs` | 19/19 |
+| `sleep.mjs` | 10/10 |
+| `repeat-ui.mjs` | 7/7 |
+| `limit.mjs` | 6/6 |
+| `chain.mjs` | successor at +24.00h — see [`test/chain.log`](./test/chain.log) |
+| `lateness.mjs` | 9/9 fired, median +5s — see [`test/lateness.log`](./test/lateness.log) |
 
 ## Running it
 
