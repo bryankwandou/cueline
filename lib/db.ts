@@ -31,6 +31,10 @@ export function migrate(): Promise<void> {
         settled_at  TIMESTAMPTZ
       )`;
     await sql()`CREATE INDEX IF NOT EXISTS runs_due ON runs (status, fire_at)`;
+    // Added after the first runs existed, so it has to arrive as an alter
+    // rather than part of the create. Null means the run happens once.
+    await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS repeat_rule TEXT`;
+    await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS next_handle TEXT`;
   })();
   return ready;
 }

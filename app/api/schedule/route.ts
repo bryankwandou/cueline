@@ -5,9 +5,18 @@ import { handle, seal } from "@/lib/vault";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+/** The repeats worth having. Anything else is a calendar, not a brief. */
+const REPEATS = new Set(["daily", "weekdays"]);
+
 /** Hands a queue to the server so it fires whether or not the tab is open. */
 export async function POST(req: Request) {
-  let body: { apiKey?: string; cues?: string[]; fireAt?: string; system?: string };
+  let body: {
+    apiKey?: string;
+    cues?: string[];
+    fireAt?: string;
+    system?: string;
+    repeat?: string;
+  };
   try {
     body = await req.json();
   } catch {
@@ -30,11 +39,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Twelve cues to a run, at most." }, { status: 400 });
   }
 
+  // A brief that only ever lands once is not a brief, it is a reminder. But a
+  // repeating run has to keep its key between firings, which is a real cost to
+  // the reader — so it is opt-in, and the console says so beside the control.
+  const repeat = body.repeat && body.repeat !== "once" ? body.repeat : null;
+  if (repeat && !REPEATS.has(repeat)) {
+    return NextResponse.json({ error: "That repeat is not one we know." }, { status: 400 });
+  }
+
   await migrate();
   const id = handle();
   await sql()`
-    INSERT INTO runs (handle, fire_at, cues, sealed_key, system)
-    VALUES (${id}, ${fireAt.toISOString()}, ${JSON.stringify(cues)}, ${seal(apiKey)}, ${body.system ?? null})`;
+    INSERT INTO runs (handle, fire_at, cues, sealed_key, system, repeat_rule)
+    VALUES (${id}, ${fireAt.toISOString()}, ${JSON.stringify(cues)}, ${seal(apiKey)},
+            ${body.system ?? null}, ${repeat})`;
 
-  return NextResponse.json({ handle: id, fireAt: fireAt.toISOString(), cues: cues.length });
+  return NextResponse.json({
+    handle: id,
+    fireAt: fireAt.toISOString(),
+    cues: cues.length,
+    repeat,
+  });
 }
