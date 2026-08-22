@@ -80,8 +80,8 @@ const dict = {
   },
   "steps.1t": { en: "Paste your key", id: "Tempel kunci Anda" },
   "steps.1d": {
-    en: "An Anthropic API key from the Console. It is stored in this browser and nowhere else — no account to make, no password to forget.",
-    id: "Kunci API Anthropic dari Console. Tersimpan di peramban ini dan tidak di tempat lain — tidak ada akun yang dibuat, tidak ada sandi yang terlupa.",
+    en: "An Anthropic API key from the Console — not a Claude.ai subscription, which has no interface a tool like this can legitimately use. The key stays in this browser unless you hand a run to the server, and then it goes along encrypted and is wiped when the run finishes. No account to make, no password to forget.",
+    id: "Kunci API Anthropic dari Console — bukan langganan Claude.ai, yang tidak punya antarmuka yang bisa dipakai alat seperti ini secara sah. Kunci itu tinggal di peramban ini kecuali Anda menyerahkan run ke server; kunci ikut dalam keadaan terenkripsi lalu dihapus saat run selesai. Tidak ada akun yang dibuat, tidak ada sandi yang terlupa.",
   },
   "steps.2t": { en: "Write your cues", id: "Tulis cue Anda" },
   "steps.2d": {
@@ -242,6 +242,15 @@ const dict = {
     en: "The queue fires from our server, within about half a minute of the time you set, whether or not this browser is open. Your key is encrypted and held until the run finishes, then wiped from the row.",
     id: "Antrean menyala dari server kami, dalam sekitar setengah menit dari waktu yang Anda tetapkan, entah peramban ini terbuka atau tidak. Kunci Anda dienkripsi dan disimpan sampai run selesai, lalu dihapus dari barisnya.",
   },
+  "c.repeat": { en: "How often", id: "Seberapa sering" },
+  "c.repeatOnce": { en: "Once", id: "Sekali" },
+  "c.repeatDaily": { en: "Every day", id: "Setiap hari" },
+  "c.repeatWeekdays": { en: "Weekdays", id: "Hari kerja" },
+  "c.repeatNote": {
+    en: "A run that repeats has to keep your key between firings, so it stays encrypted in the row until you stop the schedule. A one-off run wipes its key the moment it finishes.",
+    id: "Run yang berulang harus menyimpan kunci Anda di antara penyalaan, jadi kunci itu tetap terenkripsi di barisnya sampai Anda menghentikan jadwalnya. Run sekali jalan menghapus kuncinya begitu selesai.",
+  },
+  "c.repeatChained": { en: "Set again for the next one", id: "Sudah disetel lagi untuk berikutnya" },
   "c.cloudSent": { en: "Handed over. Keep this link.", id: "Sudah diserahkan. Simpan tautan ini." },
   "c.cloudOpen": { en: "Watch this run", id: "Pantau run ini" },
   "c.cloudBusy": { en: "Handing over…", id: "Menyerahkan…" },

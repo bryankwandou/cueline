@@ -69,6 +69,7 @@ function Console() {
   // receipt: enough to reopen the run later, and nothing that could fire it.
   const [handoff, setHandoff] = useState<string | null>(null);
   const [handing, setHanding] = useState(false);
+  const [repeat, setRepeat] = useState<"once" | "daily" | "weekdays">("once");
 
   const params = useSearchParams();
   const hydrated = useRef(false);
@@ -499,6 +500,7 @@ function Console() {
           apiKey: apiKey.trim(),
           cues: cues.map((c) => c.body),
           fireAt: new Date(Date.now() + armSeconds * 1000).toISOString(),
+          repeat,
         }),
       });
       const body = await res.json();
@@ -721,9 +723,31 @@ function Console() {
                   {t("c.cloudOpen")}
                 </a>
               )}
+
+              <p className="mt-4 text-xs uppercase tracking-[0.12em] text-faint">{t("c.repeat")}</p>
+              <div className="mt-2 grid grid-cols-3 gap-1.5" data-repeat>
+                {(["once", "daily", "weekdays"] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRepeat(r)}
+                    aria-pressed={repeat === r}
+                    className={`press rounded-[var(--r-control)] border py-1.5 text-xs ${
+                      repeat === r
+                        ? "border-accent-line bg-accent-dim text-fg"
+                        : "border-line text-faint hover:bg-panel-hover"
+                    }`}
+                  >
+                    {t(r === "once" ? "c.repeatOnce" : r === "daily" ? "c.repeatDaily" : "c.repeatWeekdays")}
+                  </button>
+                ))}
+              </div>
+
               <p className="mt-3 text-xs leading-relaxed text-faint">
                 {canArm ? t("c.cloudNote") : t("c.cloudNeed")}
               </p>
+              {repeat !== "once" && (
+                <p className="unfold mt-2 text-xs leading-relaxed text-faint">{t("c.repeatNote")}</p>
+              )}
             </Panel>
           )}
 

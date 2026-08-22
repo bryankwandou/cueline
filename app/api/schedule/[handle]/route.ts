@@ -17,6 +17,7 @@ export async function GET(_req: Request, { params }: Ctx) {
   await migrate();
   const rows = (await sql()`
     SELECT handle, fire_at, cues, status, results, settled_at,
+           repeat_rule, next_handle,
            sealed_key <> '' AS key_held
     FROM runs WHERE handle = ${handle}`) as Record<string, unknown>[];
   if (!rows.length) return NextResponse.json({ error: "No such run." }, { status: 404 });
