@@ -1,6 +1,10 @@
 // Proof that the one endpoint which spends money has a ceiling on it.
 // No credentials needed — the key below is deliberately invalid, and the runs
 // it creates fail harmlessly when they fire.
+//
+// Run this one LAST. It deliberately spends the hour's whole allowance from
+// whatever address it runs on, so contract.mjs will get 429s for an hour
+// afterwards — which is the limiter working, not the contract breaking.
 
 const BASE = process.env.BASE ?? "https://cueline-delta.vercel.app";
 
