@@ -501,6 +501,7 @@ function Console() {
           cues: cues.map((c) => c.body),
           fireAt: new Date(Date.now() + armSeconds * 1000).toISOString(),
           repeat,
+          tzOffset: -new Date().getTimezoneOffset(),
         }),
       });
       const body = await res.json();

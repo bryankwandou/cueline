@@ -74,6 +74,7 @@ Measured lateness inside a live shift: single-digit seconds.
 All three are runnable by a stranger. The first needs nothing but Node.
 
 ```bash
+node --experimental-strip-types test/repeat.mjs   # the recurrence arithmetic, incl. the weekend in your zone
 node test/contract.mjs   # public API: validation, key hiding, key wipe, real Anthropic contact
 node test/interact.mjs   # the pages, in a real browser (needs puppeteer-core + Chrome)
 node test/limit.mjs      # the ceiling on /api/schedule — run this LAST, it spends the hour

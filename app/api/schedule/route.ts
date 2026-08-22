@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     fireAt?: string;
     system?: string;
     repeat?: string;
+    tzOffset?: number;
   };
   try {
     body = await req.json();
@@ -48,6 +49,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That repeat is not one we know." }, { status: 400 });
   }
 
+  // Minutes east of UTC. Clamped rather than trusted: the only thing it can
+  // do is move a weekend, and no real zone is more than fourteen hours out.
+  const tz = Math.max(-840, Math.min(840, Math.trunc(Number(body.tzOffset) || 0)));
+
   await migrate();
 
   // Checked after the cheap validation and before anything is stored, so a
@@ -58,9 +63,9 @@ export async function POST(req: Request) {
 
   const id = handle();
   await sql()`
-    INSERT INTO runs (handle, fire_at, cues, sealed_key, system, repeat_rule, caller)
+    INSERT INTO runs (handle, fire_at, cues, sealed_key, system, repeat_rule, caller, tz_offset)
     VALUES (${id}, ${fireAt.toISOString()}, ${JSON.stringify(cues)}, ${seal(apiKey)},
-            ${body.system ?? null}, ${repeat}, ${who})`;
+            ${body.system ?? null}, ${repeat}, ${who}, ${tz})`;
 
   return NextResponse.json({
     handle: id,
