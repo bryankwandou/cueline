@@ -85,7 +85,9 @@ All three are runnable by a stranger. The first needs nothing but Node.
 ```bash
 node --experimental-strip-types test/repeat.mjs   # the recurrence arithmetic, incl. the weekend in your zone
 node test/contract.mjs   # public API: validation, key hiding, key wipe, real Anthropic contact
-node test/interact.mjs   # the pages, in a real browser (needs puppeteer-core + Chrome)
+node test/interact.mjs   # the pages, in a real browser
+node test/sleep.mjs      # the countdown survives a tab that goes away
+node test/repeat-ui.mjs  # the repeat control, in both languages
 node test/limit.mjs      # the ceiling on /api/schedule — run this LAST, it spends the hour
 node test/lateness.mjs   # how late runs actually land (three hours to complete)
 node test/chain.mjs      # a daily run really does leave a successor behind (~3 minutes)
