@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Mark, Wordmark } from "@/components/logo";
 import { LangToggle } from "@/components/lang-toggle";
 import { useT } from "@/lib/i18n";
@@ -14,7 +15,17 @@ import {
   type RunResponse,
 } from "@/lib/types";
 
-export default function Console() {
+export default function ConsolePage() {
+  // useSearchParams needs a boundary it can suspend against during
+  // prerender; the console itself is unchanged by the wrapping.
+  return (
+    <Suspense>
+      <Console />
+    </Suspense>
+  );
+}
+
+function Console() {
   const t = useT();
 
   const [apiKey, setApiKey] = useState("");
@@ -43,6 +54,7 @@ export default function Console() {
   const [handoff, setHandoff] = useState<string | null>(null);
   const [handing, setHanding] = useState(false);
 
+  const params = useSearchParams();
   const hydrated = useRef(false);
 
   /* ---- restore last session ------------------------------------ */
@@ -54,6 +66,28 @@ export default function Console() {
     setAt(load("at", "07:00"));
     hydrated.current = true;
   }, []);
+
+  /**
+   * Adopts a cue written on the landing page.
+   *
+   * Someone who has just watched their own sentence land in the demo should
+   * find it waiting here rather than having to type it twice. Runs after the
+   * restore above so the carried cue joins the saved queue instead of racing
+   * it, and only once — the ref keeps a re-render from appending duplicates.
+   */
+  const carried = useRef(false);
+  useEffect(() => {
+    if (carried.current) return;
+    const text = params.get("cue")?.trim();
+    if (!text) return;
+    carried.current = true;
+    setCues((prev) =>
+      prev.some((c) => c.body === text)
+        ? prev
+        : [...prev, { id: newId(), body: text, status: "queued" }],
+    );
+    window.history.replaceState(null, "", "/console");
+  }, [params]);
 
   useEffect(() => {
     if (hydrated.current) save("key", apiKey);

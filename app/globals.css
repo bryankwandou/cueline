@@ -433,3 +433,55 @@ kbd {
   border-radius: var(--r-pill);
   transition: width 420ms var(--ease);
 }
+
+/* The range input in the cost dial.
+   Styled by hand because the native control brings a different look on every
+   platform, and this one sits directly beside a figure it is supposed to be
+   driving — the two have to read as one instrument. */
+.dial {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: var(--border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.dial::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent-line);
+  transition:
+    transform 140ms cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 140ms ease;
+}
+
+.dial::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 3px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--accent-line);
+}
+
+.dial:hover::-webkit-slider-thumb,
+.dial:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 6px var(--accent-dim);
+}
+
+.dial:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial::-webkit-slider-thumb {
+    transition: none;
+  }
+}
