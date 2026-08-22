@@ -15,6 +15,22 @@ import {
   type RunResponse,
 } from "@/lib/types";
 
+/**
+ * How late a resumed countdown may be before it is stood down instead of
+ * fired. Ten minutes covers a lid closed over lunch; it does not cover a
+ * laptop reopened the next morning.
+ */
+const GRACE_MS = 10 * 60 * 1000;
+
+/** Renders a gap in whichever unit reads without arithmetic. */
+function describeGap(ms: number, t: (k: never, v?: Record<string, string | number>) => string): string {
+  const min = Math.round(ms / 60000);
+  if (min < 60) return t("c.agoMin" as never, { a: min });
+  const hours = Math.round(min / 60);
+  if (hours < 24) return t("c.agoHour" as never, { a: hours });
+  return t("c.agoDay" as never, { a: Math.round(hours / 24) });
+}
+
 export default function ConsolePage() {
   // useSearchParams needs a boundary it can suspend against during
   // prerender; the console itself is unchanged by the wrapping.
@@ -64,7 +80,41 @@ function Console() {
     setCues(load<Cue[]>("cues", []));
     setSched(load<"in" | "at">("sched", "in"));
     setAt(load("at", "07:00"));
+
+    /*
+     * A countdown that outlived its tab.
+     *
+     * Sleeping the machine, or letting the browser discard a background tab,
+     * ends the page without ending the appointment. Reading the deadline back
+     * means a short absence simply resumes: the clock effect sees a target in
+     * the past and fires at once.
+     *
+     * A long absence is a different question. Waking up to a queue that spends
+     * money on a morning brief three days stale helps nobody, so past the
+     * grace window the run is stood down and said so plainly. That gap is the
+     * honest argument for handing the run to the server instead.
+     */
+    const wasArmed = load("armed", false);
+    const target = load<number | null>("fireAt", null);
+    if (wasArmed && target !== null) {
+      const late = Date.now() - target;
+      if (late > GRACE_MS) {
+        setArmed(false);
+        setFireAt(null);
+        save("armed", false);
+        save("fireAt", null);
+        setNotice(t("c.missed", { a: describeGap(late, t) }));
+      } else {
+        setFireAt(target);
+        setArmed(true);
+        if (late > 1000) setNotice(t("c.resumed"));
+      }
+    }
+
     hydrated.current = true;
+    // Deliberately once, on mount. Re-running on a language change would
+    // re-restore a countdown the reader has since cancelled.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -104,6 +154,16 @@ function Console() {
   useEffect(() => {
     if (hydrated.current) save("at", at);
   }, [at]);
+
+  // The countdown survives a sleeping laptop only if the deadline outlives the
+  // tab. Everything else here was already written down; these two were not,
+  // so a discarded tab came back with the queue intact and the clock at zero.
+  useEffect(() => {
+    if (hydrated.current) save("armed", armed);
+  }, [armed]);
+  useEffect(() => {
+    if (hydrated.current) save("fireAt", fireAt);
+  }, [fireAt]);
 
   /* ---- the clock ------------------------------------------------ */
   const fire = useCallback(async () => {

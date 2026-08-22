@@ -223,6 +223,19 @@ const dict = {
 
   /* ---- console ------------------------------------------------- */
 
+  "c.missed": {
+    en: "This was due {a} ago, while the tab was closed. Nothing was sent. Arm it again, or hand the next one to the server.",
+    id: "Ini jatuh tempo {a} lalu, saat tab tertutup. Tidak ada yang dikirim. Siapkan lagi, atau serahkan yang berikutnya ke server.",
+  },
+  "c.agoMin": { en: "{a} minutes", id: "{a} menit" },
+  "c.agoHour": { en: "{a} hours", id: "{a} jam" },
+  "c.agoDay": { en: "{a} days", id: "{a} hari" },
+  "c.resumed": {
+    en: "Picked the countdown back up where it left off.",
+    id: "Hitung mundur dilanjutkan dari posisi terakhir.",
+  },
+
+
   "c.cloud": { en: "Run without this tab", id: "Jalan tanpa tab ini" },
   "c.cloudHand": { en: "Hand this run to the server", id: "Serahkan run ini ke server" },
   "c.cloudNote": {
