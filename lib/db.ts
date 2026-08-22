@@ -35,6 +35,11 @@ export function migrate(): Promise<void> {
     // rather than part of the create. Null means the run happens once.
     await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS repeat_rule TEXT`;
     await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS next_handle TEXT`;
+    // A salted digest of the caller, never the address itself. It exists only
+    // so a burst from one place can be counted and stopped; it cannot be read
+    // back into an IP, and it goes when the row does.
+    await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS caller TEXT`;
+    await sql()`CREATE INDEX IF NOT EXISTS runs_caller ON runs (caller, created_at)`;
   })();
   return ready;
 }

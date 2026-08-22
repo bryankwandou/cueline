@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { migrate, sql } from "@/lib/db";
 import { handle, seal } from "@/lib/vault";
+import { caller, overLimit } from "@/lib/limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,11 +49,18 @@ export async function POST(req: Request) {
   }
 
   await migrate();
+
+  // Checked after the cheap validation and before anything is stored, so a
+  // flood costs one count query and never leaves a key behind.
+  const who = caller(req);
+  const refusal = await overLimit(who);
+  if (refusal) return NextResponse.json({ error: refusal }, { status: 429 });
+
   const id = handle();
   await sql()`
-    INSERT INTO runs (handle, fire_at, cues, sealed_key, system, repeat_rule)
+    INSERT INTO runs (handle, fire_at, cues, sealed_key, system, repeat_rule, caller)
     VALUES (${id}, ${fireAt.toISOString()}, ${JSON.stringify(cues)}, ${seal(apiKey)},
-            ${body.system ?? null}, ${repeat})`;
+            ${body.system ?? null}, ${repeat}, ${who})`;
 
   return NextResponse.json({
     handle: id,
