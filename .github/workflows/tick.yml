@@ -1,11 +1,19 @@
 # Something has to knock on the door while the laptop is shut.
 #
-# Vercel's free tier will only run a cron once a day, which is no use to a
-# queue set for 07:00. GitHub runs this every five minutes at no cost, so the
-# worst a cue is ever late is that gap — the price of not asking anyone for a
-# card. GitHub deprioritises scheduled runs under load, so a once-daily Vercel
-# cron in vercel.json stays on as a floor beneath this — the most the free
-# tier there allows.
+# Vercel's free tier runs a cron once a day, which is no use to a queue set
+# for 07:00. GitHub is the free alternative, but it deprioritises scheduled
+# runs hard: this workflow asked for every five minutes and was measured
+# arriving every 19 to 53. Treating each run as a single knock would make a
+# cue up to an hour late.
+#
+# So a run is not a knock, it is a shift. Each one stays alive for 55 minutes
+# and checks every 30 seconds. GitHub then only has to start *a* run within
+# the hour rather than on the minute, and the shifts overlap. Two ticks
+# landing together is harmless — /api/tick claims rows with a conditional
+# UPDATE, so the second one finds nothing left to take.
+#
+# Public repository, so the minutes cost nothing. The once-daily Vercel cron
+# in vercel.json stays on underneath as a floor.
 name: tick
 
 on:
@@ -13,12 +21,24 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
+# Overlap is wanted here, so no concurrency group cancels the running shift.
 jobs:
   tick:
     runs-on: ubuntu-latest
+    timeout-minutes: 58
     steps:
-      - name: Fire any queue that has come due
+      - name: Hold the line for 55 minutes, looking for due queues
         run: |
-          curl -sS --fail-with-body \
-            -H "authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            https://cueline-delta.vercel.app/api/tick
+          fired=0
+          for i in $(seq 1 110); do
+            out=$(curl -sS --max-time 55 \
+              -H "authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              https://cueline-delta.vercel.app/api/tick) || out='{"error":"unreachable"}'
+            ran=$(printf '%s' "$out" | grep -o '"ran":[0-9]*' | cut -d: -f2)
+            if [ -n "$ran" ] && [ "$ran" -gt 0 ]; then
+              fired=$((fired + ran))
+              echo "$(date -u +%H:%M:%S)  fired $ran — $out"
+            fi
+            sleep 30
+          done
+          echo "shift over; $fired queue(s) sent"
