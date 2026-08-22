@@ -67,7 +67,16 @@ with a conditional `UPDATE`, so exactly one shift can win a row. Vercel's own
 cron runs once a day underneath as a floor, which is the most the free tier
 will do.
 
-Measured lateness inside a live shift: single-digit seconds.
+Measured, not asserted. Nine runs booked twenty minutes apart across three
+hours, each one timed against its own due moment:
+
+```
+best +2s   median +5s   worst +17s   9/9 fired
+```
+
+The raw log is [`test/lateness.log`](./test/lateness.log) and the probe that
+produced it is [`test/lateness.mjs`](./test/lateness.mjs) — three hours to
+reproduce, no key spent, because the probe's key is deliberately invalid.
 
 ## Proofs
 
@@ -78,6 +87,7 @@ node --experimental-strip-types test/repeat.mjs   # the recurrence arithmetic, i
 node test/contract.mjs   # public API: validation, key hiding, key wipe, real Anthropic contact
 node test/interact.mjs   # the pages, in a real browser (needs puppeteer-core + Chrome)
 node test/limit.mjs      # the ceiling on /api/schedule — run this LAST, it spends the hour
+node test/lateness.mjs   # how late runs actually land (three hours to complete)
 ```
 
 ## Running it
