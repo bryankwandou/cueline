@@ -578,7 +578,11 @@ function Console() {
               ))}
             </div>
 
+            {/* data-clock is a handle for the browser test: the countdown is
+                the one thing here worth asserting on directly, and pinning it
+                to a class would tie the test to the styling. */}
             <div
+              data-clock
               className={`tnum flex items-baseline justify-center gap-1.5 rounded-[var(--r-control)] border border-line bg-bg-raised py-8 font-mono text-5xl font-medium ${
                 armed ? "armed" : ""
               }`}
