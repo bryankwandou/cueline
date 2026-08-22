@@ -39,6 +39,9 @@ export function migrate(): Promise<void> {
     // so a burst from one place can be counted and stopped; it cannot be read
     // back into an IP, and it goes when the row does.
     await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS caller TEXT`;
+    // Minutes east of UTC, as the browser reported them. Only the weekend
+    // rule reads it, and only so the weekend is the reader's weekend.
+    await sql()`ALTER TABLE runs ADD COLUMN IF NOT EXISTS tz_offset INT NOT NULL DEFAULT 0`;
     await sql()`CREATE INDEX IF NOT EXISTS runs_caller ON runs (caller, created_at)`;
   })();
   return ready;
