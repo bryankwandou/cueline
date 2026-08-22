@@ -88,6 +88,7 @@ node test/contract.mjs   # public API: validation, key hiding, key wipe, real An
 node test/interact.mjs   # the pages, in a real browser (needs puppeteer-core + Chrome)
 node test/limit.mjs      # the ceiling on /api/schedule — run this LAST, it spends the hour
 node test/lateness.mjs   # how late runs actually land (three hours to complete)
+node test/chain.mjs      # a daily run really does leave a successor behind (~3 minutes)
 ```
 
 ## Running it

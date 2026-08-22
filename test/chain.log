@@ -1,0 +1,22 @@
+Recorded 2026-08-22, against https://cueline-delta.vercel.app
+
+scheduled: 200 {"handle":"Amy3Ak4DYj4D-VWQYQmF-YcT","fireAt":"2026-08-22T18:31:39.131Z","cues":1,"repeat":"daily"}
+[18:30:07Z] status=waiting key_held=true  next=-
+[18:30:27Z] status=waiting key_held=true  next=-
+[18:30:49Z] status=waiting key_held=true  next=-
+[18:31:10Z] status=waiting key_held=true  next=-
+[18:31:31Z] status=waiting key_held=true  next=-
+[18:31:52Z] status=waiting key_held=true  next=-
+[18:32:12Z] status=done    key_held=false next=o8EV2F2OVqprzWE7kKeBocgf
+
+successor: {"handle":"o8EV2F2OVqprzWE7kKeBocgf","fire_at":"2026-08-23T18:31:39.131Z",
+            "cues":["chain probe"],"status":"waiting","repeat_rule":"daily","key_held":true}
+
+gap from the original: 24.00 hours
+CHAIN OK — successor is one day later
+
+Two things this shows that are worth reading twice. The finished row's key is
+gone (key_held false), and the successor's key is not (key_held true) — which
+is the cost of a repeating run, stated in the console and visible here. The
+successor was then shredded with DELETE, which returned 200, and reading it
+afterwards returned 404.
